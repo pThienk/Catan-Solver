@@ -16,9 +16,6 @@ public class Board {
        CreateRandomBoard();
     }
 
-
-
-
     public void CreateRandomBoard(){
         //generate Hexes
         for (int i = 0; i < 5; i++) {
