@@ -13,6 +13,13 @@ public class Board {
      * Generates a Random Board
      */
     public Board(){
+       CreateRandomBoard();
+    }
+
+
+
+
+    public void CreateRandomBoard(){
         //generate Hexes
         for (int i = 0; i < 5; i++) {
             int num = 4; if(i > 2) num = 3;
@@ -63,21 +70,60 @@ public class Board {
             }
             if(i == Hex.Hex_Alignment[hexAlignmentIndex] - 1) hexAlignmentIndex ++;
         }
-
-
+        //making every spot aware of its adjacent spot
+        //add left/right
+        int boundIndex = 0;
+        int leftBound = 0;
+        int rightBound = Spot.Spot_Alignment[boundIndex];
+        for (int i = 0; i < 54; i++) {
+            if(i == rightBound && i != 53){
+                boundIndex++;
+                leftBound = rightBound;
+                rightBound = Spot.Spot_Alignment[boundIndex];
+            }
+            if(i - 1 >= leftBound)
+                spots.get(i).adjacentSpots.add(spots.get(i - 1));
+            if(i + 1 < rightBound)
+                spots.get(i).adjacentSpots.add(spots.get(i + 1));
+        }
+        //add top/down
+        int offset = 8;
+        for (int i = 0; i < 54; i+=2) {
+            if(i + offset < 54){
+                spots.get(i).adjacentSpots.add(spots.get(i + offset));
+                spots.get(i + offset).adjacentSpots.add(spots.get(i));
+            }
+            if(i == 6) { i--; offset = 10; }
+            else if(i == 15){ i--; offset = 11; }
+            else if(i == 26){ offset = 10; }
+            else if(i == 36){ i ++; offset = 8; }
+        }
+        //generate ports
+        for (int i = 0; i < 9; i++) {
+            Port port = new Port(Port.portTypeArray[i]);
+            spots.get( Port.portLocationArray[i*2] - 1 ).hasPort = true;
+            spots.get( Port.portLocationArray[i*2 + 1] - 1 ).hasPort = true;
+            spots.get(Port.portLocationArray[i*2] - 1).port = port;
+            spots.get(Port.portLocationArray[i*2 + 1] - 1).port = port;
+        }
+    }
+    /**
+     * Print the board hexes and numbers in a good looking way
+     */
+    public void PrintBoard(){
         for (int i = 0; i < 19; i++) {
             System.out.println("Hex " + hexes.get(i).id + " has spots: " +
                     hexes.get(i).showAdjacentSpots());
         }
-    }
-
-
-
-
-    /**
-     * Print the board hexes and numbers in a good looking way
-     */
-    public void printBoard(){
+        for (int i = 0; i < spots.size(); i++) {
+            if(spots.get(i).hasPort){
+                System.out.print("Spot " + spots.get(i).id + " has Port " + spots.get(i).port.type);
+                System.out.println(" and hexes " + spots.get(i).printAdjacentHexes());
+            }
+        }
+        for (int i = 0; i < spots.size(); i++) {
+            System.out.println("Spot " + i + " is next to: " + spots.get(i).showAdjacentSpots());
+        }
         int index = 0;
         System.out.print("            ");
         for (int i = 0; i < hexes.size(); i++) {
