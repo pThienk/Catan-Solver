@@ -112,10 +112,10 @@ public class Board {
             System.out.println("Hex " + hexes.get(i).id + " has spots: " +
                     hexes.get(i).showAdjacentSpots());
         }
-        for (int i = 0; i < spots.size(); i++) {
-            if(spots.get(i).hasPort){
-                System.out.print("Spot " + spots.get(i).id + " has Port " + spots.get(i).port.type);
-                System.out.println(" and hexes " + spots.get(i).printAdjacentHexes());
+        for (Spot spot : spots) {
+            if (spot.hasPort) {
+                System.out.print("Spot " + spot.id + " has Port " + spot.port.type);
+                System.out.println(" and hexes " + spot.printAdjacentHexes());
             }
         }
         for (int i = 0; i < spots.size(); i++) {

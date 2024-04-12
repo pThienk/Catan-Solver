@@ -1,11 +1,3 @@
-enum Port_Type{
-    Wood,
-    Brick,
-    Sheep,
-    Wheat,
-    Ore,
-    General
-}
 public class Port {
     public static Port_Type[] portTypeArray =
             {Port_Type.Wood, Port_Type.Brick, Port_Type.Sheep, Port_Type.Wheat, Port_Type.Ore,

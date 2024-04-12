@@ -15,17 +15,17 @@ public class Spot {
     }
 
     public String printAdjacentHexes(){
-        String a = "";
-        for (int i = 0; i < adjacentHexes.size(); i++) {
-            a += adjacentHexes.get(i).type + " " + adjacentHexes.get(i).diceNum + ", ";
+        StringBuilder a = new StringBuilder();
+        for (Hex adjacentHex : adjacentHexes) {
+            a.append(adjacentHex.type).append(" ").append(adjacentHex.diceNum).append(", ");
         }
-        return a;
+        return a.toString();
     }
     public String showAdjacentSpots(){
-        String a = "";
-        for (int i = 0; i < adjacentSpots.size(); i++) {
-            a += adjacentSpots.get(i).id + " ";
+        StringBuilder a = new StringBuilder();
+        for (Spot adjacentSpot : adjacentSpots) {
+            a.append(adjacentSpot.id).append(" ");
         }
-        return a;
+        return a.toString();
     }
 }

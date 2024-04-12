@@ -1,14 +1,5 @@
 import java.util.ArrayList;
 
-enum Hex_Type{
-    Wood,
-    Brick,
-    Sheep,
-    Wheat,
-    Ore,
-    Desert
-}
-
 public class Hex {
 
     public static Hex_Type[] HexTypeArray =
