@@ -3,7 +3,7 @@ import java.util.List;
 
 public class Hex {
 
-    public List<Integer> adjacentHexIndices = new ArrayList<>();
+    public List<Integer> adjacentHexes = new ArrayList<>();
     public static Hex_Type[] HexTypeArray =
             {Hex_Type.Wood, Hex_Type.Sheep, Hex_Type.Wheat, Hex_Type.Brick, Hex_Type.Ore};
     public static int[] Hex_Alignment  = {3, 7, 12, 16, 19};

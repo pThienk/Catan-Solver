@@ -9,6 +9,9 @@ public class Board {
             {1, 1, 1, 1,},
             {1, 1, 1}
     };
+
+    public static final int[] ACCUMULATED_HEXES = {0, 3, 7, 12, 16, 19};
+
     public List<Hex> hexes = new ArrayList<Hex>();
     public List<Spot> spots = new ArrayList<Spot>();
     public List<Settlement> settlements = new ArrayList<Settlement>();
@@ -44,9 +47,7 @@ public class Board {
 
         Collections.shuffle(nums);
 
-        for (Hex hex : hexes) {
-            
-        }
+        // Add adjacent hexes to each hex
 
         for (int i = 0; i < hexes.size() - 1; i++) {
             hexes.get(i).diceNum = nums.get(i);
