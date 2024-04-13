@@ -19,3 +19,6 @@ created the Catan board
 - types are managed by enums of Port_Type and Hex_Type
     - Easy to be changed when interacting with user interface
  */
+
+/*
+* */

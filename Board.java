@@ -1,6 +1,14 @@
 import java.util.*;
 
 public class Board {
+
+    public static final int[][] BOARD_LAYOUT = {
+            {1, 1, 1},
+            {1, 1, 1, 1},
+            {1, 1, 1, 1, 1},
+            {1, 1, 1, 1,},
+            {1, 1, 1}
+    };
     public List<Hex> hexes = new ArrayList<Hex>();
     public List<Spot> spots = new ArrayList<Spot>();
     public List<Settlement> settlements = new ArrayList<Settlement>();
@@ -33,10 +41,17 @@ public class Board {
             nums.add(i);
             nums.add(i);
         }
+
         Collections.shuffle(nums);
+
+        for (Hex hex : hexes) {
+            
+        }
+
         for (int i = 0; i < hexes.size() - 1; i++) {
             hexes.get(i).diceNum = nums.get(i);
         }
+
         //generate the spots
         for (int i = 0; i < 54; i++) {
             Spot spot = new Spot(i);
