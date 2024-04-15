@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Catan-Solver:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Catan_Solver_jar</output-path>
+    <root id="archive" name="Catan-Solver.jar">
+      <element id="module-output" name="Catan-Solver" />
+    </root>
+  </artifact>
+</component>

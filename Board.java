@@ -21,22 +21,86 @@ public class Board {
         for (int i = 0; i < 5; i++) {
             int num = 4; if(i > 2) num = 3;
             for (int j = 0; j < num; j++) {
-                hexes.add(new Hex(Hex.HexTypeArray[i], hexes.size()));
+                hexes.add(new Hex(Hex.HexTypeArray[i]));
             }
         }
-        hexes.add(new Hex(Hex_Type.Desert, hexes.size()));
+        hexes.add(new Hex(Hex_Type.Desert));
+        Collections.shuffle(hexes);
+        for (int i = 0; i < hexes.size(); i++) {
+            hexes.get(i).id = i;
+        }
+        int hexAlignmentIndex = 0;
+        int offset = 3;
+        for (int i = 0; i < hexes.size(); i++) {
+            if(i != Hex.Hex_Alignment[hexAlignmentIndex] - 1){
+                if(i + 1 < 19){
+                    hexes.get(i).adjacentHexes.add(hexes.get(i + 1));
+                    hexes.get(i + 1).adjacentHexes.add(hexes.get(i));
+                }
+            }
+            if(i < 7){
+                //left down
+                hexes.get(i).adjacentHexes.add(hexes.get(i + offset));
+                hexes.get(i + offset).adjacentHexes.add(hexes.get(i));
+//inverse
+                hexes.get(19 - i - 1).adjacentHexes.add(hexes.get(19 - i - offset - 1));
+                hexes.get(19 - i - offset - 1).adjacentHexes.add(hexes.get(19 - i - 1));
+                //right down
+                hexes.get(i).adjacentHexes.add(hexes.get(i + offset + 1));
+                hexes.get(i + offset + 1).adjacentHexes.add(hexes.get(i));
+//inverse
+                hexes.get(19 - i - 1).adjacentHexes.add(hexes.get(19 - i - offset - 2));
+                hexes.get(19 - i - offset - 2).adjacentHexes.add(hexes.get(19 - i - 1));
+
+            }
+            if(i == Hex.Hex_Alignment[hexAlignmentIndex] - 1 && hexAlignmentIndex <4){
+                hexAlignmentIndex++;
+                offset = Hex.Hex_Alignment[hexAlignmentIndex] - Hex.Hex_Alignment[hexAlignmentIndex - 1];
+            }
+        }
         //generate the corresponding dice rolls
         List<Integer> nums = new ArrayList<Integer>();
-        nums.add(2); nums.add(12);
+        nums.add(2); nums.add(12); nums.add(0);
         for (int i = 3; i < 12; i++) {
             if(i == 7) continue;
             nums.add(i);
             nums.add(i);
         }
+
         Collections.shuffle(nums);
-        for (int i = 0; i < hexes.size() - 1; i++) {
-            hexes.get(i).diceNum = nums.get(i);
+        boolean reshuffle = true;
+        while(reshuffle) {
+            reshuffle = false;
+            for (int i = 0; i < nums.size(); i++) {
+                if(nums.get(i) == 6 || nums.get(i) == 8){
+                    for (int j = 0; j < hexes.get(i).adjacentHexes.size(); j++) {
+                        int adjID = hexes.get(i).adjacentHexes.get(j).id;
+                        if(
+                                nums.get(adjID) == 6 ||
+                                        nums.get(adjID) == 8
+                        ){
+                            reshuffle = true; break;
+                        }
+                    }
+                }
+            }
+            if(reshuffle){
+                Collections.shuffle(nums);
+            }
         }
+
+        int newdesertPlace = 0;
+        int olddesertPlace = 0;
+        for (int i = 0; i < hexes.size(); i++) {
+            hexes.get(i).diceNum = nums.get(i);
+            if(hexes.get(i).diceNum == 0) newdesertPlace = hexes.get(i).id;
+            if(hexes.get(i).type == Hex_Type.Desert) olddesertPlace = hexes.get(i).id;
+        }
+        if(newdesertPlace != olddesertPlace){
+            hexes.get(olddesertPlace).type = hexes.get(newdesertPlace).type;
+            hexes.get(newdesertPlace).type = Hex_Type.Desert;
+        }
+
         //generate the spots
         for (int i = 0; i < 54; i++) {
             Spot spot = new Spot(i);
@@ -44,7 +108,7 @@ public class Board {
         }
         //adding every spot to its corresponding hex & hex to its corresponding spot
         //counting from the top & inverse
-        int hexAlignmentIndex = 0;
+        hexAlignmentIndex = 0;
         for (int i = 0; i < 12; i++) {
             for (int j = 0; j < 3; j++) {
                 hexes.get(i).adjacentSpots.add(spots.get(i*2 + j + hexAlignmentIndex));
@@ -84,7 +148,7 @@ public class Board {
                 spots.get(i).adjacentSpots.add(spots.get(i + 1));
         }
         //add top/down
-        int offset = 8;
+        offset = 8;
         for (int i = 0; i < 54; i+=2) {
             if(i + offset < 54){
                 spots.get(i).adjacentSpots.add(spots.get(i + offset));
@@ -120,6 +184,10 @@ public class Board {
         }
         for (int i = 0; i < spots.size(); i++) {
             System.out.println("Spot " + i + " is next to: " + spots.get(i).showAdjacentSpots());
+        }
+        for (int i = 0; i < 19; i++) {
+            System.out.println("Hex " + hexes.get(i).id + " has hexes: " +
+                    hexes.get(i).showAdjacentHexes());
         }
         int index = 0;
         System.out.print("            ");
