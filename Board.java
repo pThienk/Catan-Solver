@@ -8,7 +8,7 @@ public class Board {
     public List<Player> players = new ArrayList<Player>();
 
     public Spot blockedSpot;
-
+    public StringBuilder output = new StringBuilder(); // 用于收集输出数据的StringBuilder
     /**
      * Generates a Random Board
      */
@@ -159,7 +159,7 @@ public class Board {
             else if(i == 26){ offset = 10; }
             else if(i == 36){ i ++; offset = 8; }
         }
-        //generate ports
+        //porty
         for (int i = 0; i < 9; i++) {
             Port port = new Port(Port.portTypeArray[i]);
             spots.get( Port.portLocationArray[i*2] - 1 ).hasPort = true;
@@ -168,43 +168,43 @@ public class Board {
             spots.get(Port.portLocationArray[i*2 + 1] - 1).port = port;
         }
     }
-    /**
-     * Print the board hexes and numbers in a good looking way
-     */
     public void PrintBoard(){
         for (int i = 0; i < 19; i++) {
-            System.out.println("Hex " + hexes.get(i).id + " has spots: " +
-                    hexes.get(i).showAdjacentSpots());
+//            System.out.println("Hex " + hexes.get(i).id + " has spots: " +
+//                    hexes.get(i).showAdjacentSpots());
         }
         for (Spot spot : spots) {
             if (spot.hasPort) {
-                System.out.print("Spot " + spot.id + " has Port " + spot.port.type);
-                System.out.println(" and hexes " + spot.printAdjacentHexes());
+//                System.out.print("Spot " + spot.id + " has Port " + spot.port.getType());
+//                System.out.println(" and hexes " + spot.printAdjacentHexes());
             }
         }
         for (int i = 0; i < spots.size(); i++) {
-            System.out.println("Spot " + i + " is next to: " + spots.get(i).showAdjacentSpots());
+//            System.out.println("Spot " + i + " is next to: " + spots.get(i).showAdjacentSpots());
         }
         for (int i = 0; i < 19; i++) {
-            System.out.println("Hex " + hexes.get(i).id + " has hexes: " +
-                    hexes.get(i).showAdjacentHexes());
+//            System.out.println("Hex " + hexes.get(i).id + " has hexes: " +
+//                    hexes.get(i).showAdjacentHexes());
         }
         int index = 0;
         System.out.print("            ");
         for (int i = 0; i < hexes.size(); i++) {
             System.out.print(hexes.get(i).type + "_" + hexes.get(i).diceNum + "   ");
+            output.append(hexes.get(i).type + "_" + hexes.get(i).diceNum + ",");
+
             if(i == Hex.Hex_Alignment[index] - 1){
                 System.out.println();
-
                 int spaceNum = 0;
                 if(index == 0 || index == 2) spaceNum = 7;
                 else if(index == 3) spaceNum = 12;
                 for (int j = 0; j < spaceNum; j++) {
                     System.out.print(" ");
                 }
-
                 index ++;
             }
         }
+        System.out.print(output);
+
     }
+
 }
