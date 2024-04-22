@@ -9,9 +9,26 @@ import java.nio.charset.StandardCharsets;
 public class Main {
     static String str;
     public static void  main(String[] args) throws Exception {
-        Board caftanBoard = new Board();
-        caftanBoard.PrintBoard();
-//        class collect data
+        Board catanBoard = new Board();
+        catanBoard.PrintBoard();
+
+        Player player1 = new Player(1);
+        Player player2 = new Player(2);
+        catanBoard.players.add(player1);
+        catanBoard.players.add(player2);
+
+        //6 14 30 31 45 44 24 35
+        catanBoard.SettlementPhase();
+        catanBoard.PrintBoard();
+
+        catanBoard.GamePhase();
+
+        RunServer();
+
+    }
+
+    private static void RunServer() throws Exception{
+        //        class collect data
 //        System.out.print(catanBoard.output);
 //        Run Server
         ServerSocket serverSocket = new ServerSocket();
@@ -24,9 +41,9 @@ public class Main {
         }
     }
     private static void handleRequest(Socket clientSocket) throws Exception {
-        Board caftanBoard = new Board();
-        caftanBoard.PrintBoard();
-        str = String.valueOf(caftanBoard.output);
+        Board catanBoard = new Board();
+        catanBoard.PrintBoard();
+        str = String.valueOf(catanBoard.output);
         System.out.println(str);
         OutputStream outputStream = clientSocket.getOutputStream();
         String response = "HTTP/1.1 200 OK\r\n" +
