@@ -13,6 +13,7 @@ public class Board {
     public int longestRoadAmount = 4;
     public Player longestRoad = null;
     public boolean isInitialSettlementPhase = true;
+    public boolean devCardUsedThisRound = false;
     public int round;
     public StringBuilder output = new StringBuilder(); // 用于收集输出数据的StringBuilder
 
@@ -77,55 +78,22 @@ public class Board {
         round = 0;
         Player currentPlayer = players.get(round % players.size());
         while (!CheckWin()){
+            devCardUsedThisRound = false;
             System.out.println("Round " + round + ", Player " + currentPlayer.id + "'s turn");
-            DiceRoll();
+            if(UseDevelopmentCard(currentPlayer, DevelopmentCard_Type.Knight, false)){
+                System.out.println("Do u want to use knight (0-no/1-yes)?");
+                int num = input.nextInt() % 2;
+                if(num == 1){
+                    UseDevelopmentCard(currentPlayer, DevelopmentCard_Type.Knight, true);
+                }
+            }
+            DiceRoll(currentPlayer);
             //here the player makes the move;
-            input.next();
-
+            currentPlayer.MakeMove(this);
+            PrintBoard();
             round++;
             currentPlayer = players.get(round % players.size());
         }
-    }
-    public void DiceRoll(){
-        int a = random.nextInt(6) + 1;
-        int b = random.nextInt(6) + 1;
-        int diceRoll = a + b;
-        System.out.println("A " + diceRoll + " is rolled");
-        for (int i = 0; i < hexes.size(); i++) {
-            if(hexes.get(i).diceNum == diceRoll){
-                for (Spot spot : hexes.get(i).adjacentSpots) {
-                    if(spot.hasSettlement){
-                        if(spot.settlement.isCity){
-                            for (int j = 0; j < 2; j++) {
-                                spot.settlement.playerOwned.resourcesAtHand.add(Resources.produce(hexes.get(i).type));
-                                System.out.print("Player " + spot.settlement.playerOwned.id + " gets " + hexes.get(i).type + "; ");
-                            }
-                        }else{
-                            spot.settlement.playerOwned.resourcesAtHand.add(Resources.produce(hexes.get(i).type));
-                            System.out.print("Player " + spot.settlement.playerOwned.id + " gets " + hexes.get(i).type + "; ");
-                        }
-                    }
-                }
-            }
-        }
-        System.out.println();
-    }
-    public boolean UseDevelopmentCard(Player player, DevelopmentCard_Type type){
-        boolean hasCard = false;
-        DevelopmentCard cardToUse = null;
-        for (DevelopmentCard card : player.devCards) {
-            if(card.type == type){ hasCard = true; cardToUse = card; break;}
-        }
-        if(!hasCard) return false;
-        return DevelopmentCard.Use(player, cardToUse, this);
-    }
-    public boolean BuyDevelopmentCard(Player player, int round){
-        if(DevelopmentCard.developmentCardsDeck.size() <= 0) return false;
-        if(!player.canBuy(Action_Type.BuyDevelopmentCard)) return false;
-        DevelopmentCard_Type type = DevelopmentCard.developmentCardsDeck.remove(0);
-        DevelopmentCard devCard = new DevelopmentCard(type, round);
-        player.devCards.add(devCard);
-        return true;
     }
     public boolean CheckWin(){
         for (Player player: players) {
@@ -143,6 +111,80 @@ public class Board {
         }
         return false;
     }
+    public void DiceRoll(Player player){
+        int a = random.nextInt(6) + 1;
+        int b = random.nextInt(6) + 1;
+        int diceRoll = a + b;
+        System.out.println("A " + diceRoll + " is rolled");
+        if(diceRoll == 7){
+            System.out.println("Which spot u want to block: [SB(Wh)(Wd)O] [number]");
+            Resource_Type type = Resources.resourcesList[input.nextInt()];
+            int num = input.nextInt();
+            for(Hex hex: hexes){
+                if(Resources.produce(hex.type) == type && hex.diceNum == num){
+                    hex.isBlocked = true;
+                    Player playerToStealFrom = null;
+                    for (int i = 0; i < players.size(); i++) {
+                        if(player.id != players.get(i).id){
+                            playerToStealFrom = players.get(i);
+                        }
+                    }
+                    if(playerToStealFrom != null && !playerToStealFrom.resourcesAtHand.isEmpty()){
+                        int resourceToSteal = random.nextInt(playerToStealFrom.resourcesAtHand.size());
+                        player.resourcesAtHand.add( playerToStealFrom.resourcesAtHand.get(resourceToSteal));
+                        playerToStealFrom.resourcesAtHand.remove(resourceToSteal);
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < hexes.size(); i++) {
+            if(hexes.get(i).diceNum == diceRoll){
+                if(hexes.get(i).isBlocked) continue;
+                for (Spot spot : hexes.get(i).adjacentSpots) {
+                    if(spot.hasSettlement){
+                        if(spot.settlement.isCity){
+                            for (int j = 0; j < 2; j++) {
+                                spot.settlement.playerOwned.resourcesAtHand.add(Resources.produce(hexes.get(i).type));
+                                System.out.print("Player " + spot.settlement.playerOwned.id + " gets " + hexes.get(i).type + "; ");
+                            }
+                        }else{
+                            spot.settlement.playerOwned.resourcesAtHand.add(Resources.produce(hexes.get(i).type));
+                            System.out.print("Player " + spot.settlement.playerOwned.id + " gets " + hexes.get(i).type + "; ");
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println();
+    }
+    public boolean UpgradeToCity(Player player, Spot spot, boolean actuallyUpgrade){
+        if(!spot.hasSettlement) return false;
+        if(!player.canBuy(Action_Type.UpGradeCity)) return false;
+        if(spot.settlement.isCity) return false;
+        player.Buy(Action_Type.UpGradeCity);
+        spot.settlement.isCity = true;
+        return false;
+    }
+    public boolean UseDevelopmentCard(Player player, DevelopmentCard_Type type, boolean actuallyUse){
+        boolean hasCard = false;
+        DevelopmentCard cardToUse = null;
+        for (DevelopmentCard card : player.devCards) {
+            if(card.type == type){ hasCard = true; cardToUse = card; break;}
+        }
+        if(!hasCard) return false;
+        return DevelopmentCard.Use(player, cardToUse, this, actuallyUse);
+    }
+    public boolean BuyDevelopmentCard(Player player, int round, boolean actuallyBuy){
+        if(DevelopmentCard.developmentCardsDeck.size() <= 0) return false;
+        if(!player.canBuy(Action_Type.BuyDevelopmentCard)) return false;
+        if(actuallyBuy){
+            DevelopmentCard_Type type = DevelopmentCard.developmentCardsDeck.remove(0);
+            DevelopmentCard devCard = new DevelopmentCard(type, round);
+            player.Buy(Action_Type.BuyDevelopmentCard);
+            player.devCards.add(devCard);
+        }
+        return true;
+    }
     public boolean CreateRoad(Player player, Spot spot1, Spot spot2, boolean actuallyCreate){
         if(spot1.id == spot2.id) return false;
         if(isInitialSettlementPhase){
@@ -159,7 +201,7 @@ public class Board {
             if(!player.canBuy(Action_Type.BuildRoad)) return false;
             //check if this road already exist
             for (Spot spot: spot1.spotsConnectedByRoad.keySet()) {
-                if(spot.id == spot2.id) return false;
+                if(spot.id == spot2.id){ return false;}
             }
             //check if the road is connected to a road or a settlement
             int roadConnected = 0;
@@ -169,7 +211,7 @@ public class Board {
             for (Spot spot: spot2.spotsConnectedByRoad.keySet()) {
                 if(spot2.spotsConnectedByRoad.get(spot) == player.id) roadConnected++;
             }
-            if(roadConnected == 0) return false;
+            if(roadConnected == 0){return false;}
             //create the road
             if(actuallyCreate){
                 Road road = new Road(player, spot1, spot2, roads.size());
@@ -196,6 +238,7 @@ public class Board {
                     System.out.println("New Longest Road Record! The current best is " + longestRoadAmount + " roads.");
                 }
             }
+            return true;
         }
         return false;
     }
@@ -227,6 +270,7 @@ public class Board {
         }else{
             //check if road connects
             if(spot.spotsConnectedByRoad.isEmpty()) return false;
+            if(spot.hasSettlement) return false;
             //check if resource allows
             if(!player.canBuy(Action_Type.BuildSettlement)) return false;
             //check adj spots
