@@ -117,11 +117,26 @@ public class Board {
         int diceRoll = a + b;
         System.out.println("A " + diceRoll + " is rolled");
         if(diceRoll == 7){
+            for (Player tempPlayer: players) {
+                if(tempPlayer.resourcesAtHand.size() > 9){
+                    System.out.println("!!!You HAVE TO DISCARD!!!");
+                    System.out.println("Here is your current resources, discard " + tempPlayer.resourcesAtHand.size() / 2);
+                    System.out.println("Enter the resources you want to discard: [SB(Wh)(Wd)O]");
+                    for (int i = 0; i < tempPlayer.resourcesAtHand.size() / 2; i++) {
+                        int res = input.nextInt();
+                        player.resourcesAtHand.remove(Resources.resourcesList[res]);
+                    }
+                }
+            }
             System.out.println("Which spot u want to block: [SB(Wh)(Wd)O] [number]");
             Resource_Type type = Resources.resourcesList[input.nextInt()];
             int num = input.nextInt();
             for(Hex hex: hexes){
                 if(Resources.produce(hex.type) == type && hex.diceNum == num){
+                    if(hex.isBlocked){
+                        System.out.println("Failed, must change a place");
+                        break;
+                    }
                     hex.isBlocked = true;
                     Player playerToStealFrom = null;
                     for (int i = 0; i < players.size(); i++) {
@@ -161,9 +176,11 @@ public class Board {
         if(!spot.hasSettlement) return false;
         if(!player.canBuy(Action_Type.UpGradeCity)) return false;
         if(spot.settlement.isCity) return false;
-        player.Buy(Action_Type.UpGradeCity);
-        spot.settlement.isCity = true;
-        return false;
+        if(actuallyUpgrade){
+            player.Buy(Action_Type.UpGradeCity);
+            spot.settlement.isCity = true;
+        }
+        return true;
     }
     public boolean UseDevelopmentCard(Player player, DevelopmentCard_Type type, boolean actuallyUse){
         boolean hasCard = false;
@@ -265,6 +282,9 @@ public class Board {
                 player.settlements.add(settlement);
                 spot.hasSettlement = true;
                 spot.settlement = settlement;
+                if(spot.hasPort){
+                    player.ports.add(spot.port);
+                }
             }
             return true;
         }else{

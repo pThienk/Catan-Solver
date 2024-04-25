@@ -26,6 +26,8 @@ public class Action {
             a = "Use dev card: " + potentialDevCardToUse;
         }else if(actionType == Action_Type.UpGradeCity){
             a = "Upgrade City on spot " + thisSpot.id;
+        }else if(actionType == Action_Type.Trade){
+            a = "Trade";
         }
         return a;
     }

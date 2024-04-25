@@ -9,7 +9,7 @@ public class Port {
             1, 2, 4, 5, 15, 16, 27, 38, 46, 47, 51, 52, 49, 48, 29, 39, 8, 17
     };
 
-    private Port_Type type;
+    public Port_Type type;
 
     public Port(Port_Type type) {
         this.type = type;
