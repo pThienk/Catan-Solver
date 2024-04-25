@@ -44,6 +44,75 @@ public class Player {
         }
     }
 
+    public boolean Trade(boolean actuallyTrade){
+        HashMap<Resource_Type, Integer> canTradeDIct = findTradingOptions();
+        if(canTradeDIct.isEmpty()){
+            return false;
+        }
+        if(actuallyTrade){
+            for (Resource_Type type: canTradeDIct.keySet()) {
+                System.out.println("You can trade " + type);
+            }
+            Scanner in = new Scanner(System.in);
+            System.out.println("Enter the trade you want to do [SB(Wh)(Wd)O]");
+            Resource_Type resOUT = Resources.resourcesList[in.nextInt()];
+            System.out.println("Enter the new resource you want [SB(Wh)(Wd)O]: ");
+            Resource_Type resIN = Resources.resourcesList[in.nextInt()];
+            for (int i = 0; i < canTradeDIct.get(resOUT); i++) {
+                resourcesAtHand.remove(resOUT);
+            }
+            resourcesAtHand.add(resIN);
+        }
+        return true;
+    }
+    public Map<Resource_Type, Integer> organizeResources(){
+        Map<Resource_Type, Integer> resourceCount = new HashMap<>();
+        for (Resource_Type resource: resourcesAtHand) {
+            if(!resourceCount.containsKey(resource)){
+                resourceCount.put(resource, 1);
+            }else{
+                int oldCount = resourceCount.get(resource);
+                resourceCount.put(resource, 1 + oldCount);
+            }
+        }
+        return resourceCount;
+    }
+    public HashMap<Resource_Type, Integer> findTradingOptions(){
+        Map<Resource_Type, Integer> resourceCount = organizeResources();
+        Map<Resource_Type, Integer> tradeDict = new HashMap<>();
+        int generalTrade = 4;
+        for (int i = 0; i < Resources.resourcesList.length; i++) {
+            tradeDict.put(Resources.resourcesList[i], generalTrade);
+        }
+        for (Port port: ports) {
+            if(port.type == Port_Type.General){
+                generalTrade = 3;
+                for (int i = 0; i < Resources.resourcesList.length; i++) {
+                    if(tradeDict.get(Resources.resourcesList[i]) > generalTrade){
+                        tradeDict.put(Resources.resourcesList[i], generalTrade);
+                    }
+                }
+            }if(port.type == Port_Type.Sheep){
+                tradeDict.put(Resource_Type.Sheep, 2);
+            }if(port.type == Port_Type.Wood){
+                tradeDict.put(Resource_Type.Wood, 2);
+            }if(port.type == Port_Type.Ore){
+                tradeDict.put(Resource_Type.Ore, 2);
+            }if(port.type == Port_Type.Wheat){
+                tradeDict.put(Resource_Type.Wheat, 2);
+            }if(port.type == Port_Type.Brick){
+                tradeDict.put(Resource_Type.Brick, 2);
+            }
+        }
+        HashMap<Resource_Type, Integer> ableToTrade = new HashMap<>();
+        for (Resource_Type res: resourceCount.keySet()) {
+            if(resourceCount.get(res) >= tradeDict.get(res)){
+                ableToTrade.put(res, tradeDict.get(res));
+            }
+        }
+        return ableToTrade;
+    }
+
     public void MakeMove(Board board){
         int pass = 0;
         while(pass != -1){
@@ -60,8 +129,23 @@ public class Player {
                 this.resourcesAtHand.add(Resource_Type.Ore);
                 this.resourcesAtHand.add(Resource_Type.Wheat);
                 this.resourcesAtHand.add(Resource_Type.Sheep);
+                Map<Resource_Type, Integer> resourceCount = organizeResources();
+                System.out.println("resourceCount size: " + resourceCount.size());
+                System.out.println("hand size: " + resourcesAtHand.size());
                 pass = 1;
-            }else{
+            }else if(move == -2){
+                System.out.println("Cheat Code");
+                System.out.println("hand size before: " + resourcesAtHand.size());
+                Map<Resource_Type, Integer> resourceCount = organizeResources();
+                System.out.println("resourceCount size: " + resourceCount.size());
+                System.out.println("hand size: " + resourcesAtHand.size());
+                for (Resource_Type type: resourceCount.keySet()) {
+                    System.out.print(type + ": " + resourceCount.get(type) + ", ");
+                }
+                System.out.println();
+                pass = 1;
+            }
+            else{
                 pass = Commit(actions.get(move), board);
             }
         }
@@ -83,12 +167,17 @@ public class Player {
         }else if(action.actionType == Action_Type.UpGradeCity){
             board.UpgradeToCity(this, action.thisSpot, true);
             return 1;
+        }else if(action.actionType == Action_Type.Trade){
+            Trade(true);
         }
         return 0;
     }
     public ArrayList<Action> CheckPossibleMoves(Board board){
         ArrayList<Action> actions = new ArrayList<>();
         actions.add(new Action(null, null, null, Action_Type.Pass));
+        if(Trade(false)){
+            actions.add(new Action(null, null, null, Action_Type.Trade));
+        }
         if(board.BuyDevelopmentCard(this, board.round, false)){
             actions.add(new Action(null, null, null, Action_Type.BuyDevelopmentCard));
         }
