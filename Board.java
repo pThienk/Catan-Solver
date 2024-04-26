@@ -63,7 +63,7 @@ public class Board {
                 players.get(i).resourcesAtHand.add(res);
             }
             System.out.println("Player " + players.get(i).id + " pick road.");
-            //here the Player chooses the raod
+            //here the Player chooses the raod`
             int spotRoad = input.nextInt();
             success = CreateRoad(players.get(i), spots.get(spotRoad), spots.get(spotNum), true);
             while(!success){
