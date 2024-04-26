@@ -58,6 +58,7 @@ public class Board {
             }
             //give the resources to the players.
             for (int j = 0; j < spots.get(spotNum).adjacentHexes.size(); j++) {
+                if(spots.get(spotNum).adjacentHexes.get(j).type == Hex_Type.Desert) continue;
                 Resource_Type res = Resources.produce(spots.get(spotNum).adjacentHexes.get(j).type);
                 players.get(i).resourcesAtHand.add(res);
             }
@@ -231,44 +232,56 @@ public class Board {
             if(roadConnected == 0){return false;}
             //create the road
             if(actuallyCreate){
+                player.Buy(Action_Type.BuildRoad);
                 Road road = new Road(player, spot1, spot2, roads.size());
                 roads.add(road);
                 spot1.spotsConnectedByRoad.put(spot2, player.id);
                 spot2.spotsConnectedByRoad.put(spot1, player.id);
                 //UpdateLongestRoad
-                boolean[] visited = new boolean[spots.size()];
-                int[] distance = new int[spots.size()];
-                for (int i = 0; i < spots.size(); i++) {
-                    visited[i] = false;
-                    distance[i] = 0;
-                }
+                int longestConnection = 0;
                 for (Spot spot : spots) {
-                    FindLongestRoad(spot, visited, distance, 0, player.id);
+                    boolean[] visited = new boolean[spots.size()];
+                    for (int i = 0; i < spots.size(); i++) {
+                        visited[i] = false;
+                    }
+
+                    visited[spot.id] = true;
+                    int max = 0;
+                    int max2 = 0;
+                    for (Spot next: spot.spotsConnectedByRoad.keySet()) {
+                        int length = FindLongestRoad(next, visited, player.id);
+                        if(length > max){
+                            if(max > max2) max2 = max;
+                            max = length;
+                        }else if(length > max2){
+                            max2 = length;
+                        }
+                    }
+                    longestConnection = max + max2;
+                    System.out.println("You currently have longest connection of: " + longestConnection);
+                    if(longestConnection > longestRoadAmount){
+                        longestRoadAmount = longestConnection;
+                        longestRoad = player;
+                        System.out.println("New Longest Road Record! The current best is " + longestRoadAmount + " roads.");
+                    }
                 }
-                int max = 0;
-                for (int i = 0; i < distance.length; i++) {
-                    if(distance[i] > max) max = distance[i];
-                }
-                if(max > longestRoadAmount){
-                    longestRoadAmount = max;
-                    longestRoad = player;
-                    System.out.println("New Longest Road Record! The current best is " + longestRoadAmount + " roads.");
-                }
+
             }
             return true;
         }
         return false;
     }
-    public void FindLongestRoad(Spot spot, boolean[] visited, int[] distance, int length, int playerID){
+    public int FindLongestRoad(Spot spot, boolean[] visited, int playerID){
+
         visited[spot.id] = true;
-        distance[spot.id] = length;
         for (Spot next: spot.spotsConnectedByRoad.keySet()) {
             if(playerID == spot.spotsConnectedByRoad.get(next)){
-                if(!visited[next.id] || length + 1 > distance[next.id]){
-                    FindLongestRoad(next, visited, distance, length+1, playerID);
+                if(!visited[next.id]){
+                    return 1 + FindLongestRoad(next, visited, playerID);
                 }
             }
         }
+        return 1;
     }
     //if the player just wants to check if they can build a settlement, put false for actuallyCreate
     public boolean CreateSettlement(Player player, Spot spot, boolean actuallyCreate){
