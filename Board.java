@@ -7,6 +7,8 @@ public class Board {
     public List<Road> roads = new ArrayList<Road>();
     public List<Player> players = new ArrayList<Player>();
 
+    public boolean isBenchmarking = false;
+
     public Spot blockedSpot;
     public int mostKnightAmount = 2;
     public Player largestArmy = null;
@@ -24,36 +26,79 @@ public class Board {
      */
     public Board(){
        CreateRandomBoard();
+
+    }
+
+    public Board(boolean isBenchmarking) {
+        CreateRandomBoard();
+        this.isBenchmarking = isBenchmarking;
     }
     public void SettlementPhase(){
         for (int i = 0; i < players.size(); i++) {
             System.out.println("Player " + players.get(i).id + " pick spot.");
             //here the Player chooses the spots
-            int spotNum = input.nextInt() % 54;
+
+            int spotNum;
+            if (isBenchmarking) {
+                spotNum = Benchmarking.getInitialSettlement(players.get(i), this);
+            } else {
+                spotNum = input.nextInt() % 54;
+            }
+
             boolean success = CreateSettlement(players.get(i), spots.get(spotNum), true);
             while(!success){
                 System.out.println("Failed, Try Another Spot");
-                spotNum = input.nextInt();
+
+                if (isBenchmarking) {
+                    spotNum = Benchmarking.getInitialSettlement(players.get(i), this);
+                } else {
+                    spotNum = input.nextInt();
+                }
                 success = CreateSettlement(players.get(i), spots.get(spotNum), true);
             }
             System.out.println("Player " + players.get(i).id + " pick road.");
-            //here the Player chooses the raod
-            int spotRoad = input.nextInt();
+            //here the Player chooses the road
+            int spotRoad;
+
+            if (isBenchmarking) {
+                spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
+            } else {
+                spotRoad = input.nextInt();
+            }
             success = CreateRoad(players.get(i), spots.get(spotRoad), spots.get(spotNum), true);
+
             while(!success){
                 System.out.println("Failed, Try Another road");
-                spotRoad = input.nextInt();
+
+                if (isBenchmarking) {
+                    spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
+                } else {
+                    spotRoad = input.nextInt();
+                }
+
                 success = CreateRoad(players.get(i), spots.get(spotRoad), spots.get(spotNum), true);
             }
         }
         for (int i = players.size() - 1; i >= 0 ; i--) {
             System.out.println("Player " + players.get(i).id + " pick spot.");
             //here the Player chooses the spots
-            int spotNum = input.nextInt() % 54;
+            int spotNum;
+
+            if (isBenchmarking) {
+                spotNum = Benchmarking.getInitialSettlement(players.get(i), this);
+            } else {
+                spotNum = input.nextInt() % 54;
+            }
+
             boolean success = CreateSettlement(players.get(i), spots.get(spotNum), true);
             while(!success){
                 System.out.println("Failed, Try Another Spot");
-                spotNum = input.nextInt();
+
+                if (isBenchmarking) {
+                    spotNum = Benchmarking.getInitialSettlement(players.get(i), this);
+                } else {
+                    spotNum = input.nextInt();
+                }
                 success = CreateSettlement(players.get(i), spots.get(spotNum), true);
             }
             //give the resources to the players.
@@ -64,18 +109,30 @@ public class Board {
             }
             System.out.println("Player " + players.get(i).id + " pick road.");
             //here the Player chooses the raod`
-            int spotRoad = input.nextInt();
+
+            int spotRoad;
+            if (isBenchmarking) {
+                spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
+            } else {
+                spotRoad = input.nextInt();
+            }
+
             success = CreateRoad(players.get(i), spots.get(spotRoad), spots.get(spotNum), true);
             while(!success){
                 System.out.println("Failed, Try Another road");
-                spotRoad = input.nextInt();
+
+                if (isBenchmarking) {
+                    spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
+                } else {
+                    spotRoad = input.nextInt();
+                }
                 success = CreateRoad(players.get(i), spots.get(spotRoad), spots.get(spotNum), true);
             }
         }
         isInitialSettlementPhase = false;
         System.out.println("End of the Initial Settlement Phase");
     }
-    public void GamePhase(){
+    public void GamePhase() {
         round = 0;
         Player currentPlayer = players.get(round % players.size());
         while (!CheckWin()){
@@ -108,7 +165,10 @@ public class Board {
             for (int i = 0; i < player.devCards.size(); i++) {
                 if (player.devCards.get(i).type == DevelopmentCard_Type.VictoryPoint) VP += 1;
             }
-            if(VP >= 15) return true;
+            if(VP >= 15) {
+                player.hasWon = true;
+                return true;
+            }
         }
         return false;
     }
@@ -117,23 +177,42 @@ public class Board {
         int b = random.nextInt(6) + 1;
         int diceRoll = a + b;
         System.out.println("A " + diceRoll + " is rolled");
-        if(diceRoll == 7){
+        if(diceRoll == 7) {
+
             for (Player tempPlayer: players) {
                 if(tempPlayer.resourcesAtHand.size() > 9){
                     System.out.println("!!!You HAVE TO DISCARD!!!");
                     System.out.println("Here is your current resources, discard " + tempPlayer.resourcesAtHand.size() / 2);
                     System.out.println("Enter the resources you want to discard: [SB(Wh)(Wd)O]");
-                    for (int i = 0; i < tempPlayer.resourcesAtHand.size() / 2; i++) {
-                        int res = input.nextInt();
-                        player.resourcesAtHand.remove(Resources.resourcesList[res]);
+
+                    int discardNum = (tempPlayer.resourcesAtHand.size() / 2);
+                    for (int i = 0; i < discardNum; i++) {
+                        if (isBenchmarking) {
+                            player.discardCards(discardNum);
+                        } else {
+                            int res = input.nextInt();
+                            player.resourcesAtHand.remove(Resources.resourcesList[res]);
+                        }
                     }
                 }
             }
             System.out.println("Which spot u want to block: [SB(Wh)(Wd)O] [number]");
-            Resource_Type type = Resources.resourcesList[input.nextInt()];
-            int num = input.nextInt();
-            for(Hex hex: hexes){
-                if(Resources.produce(hex.type) == type && hex.diceNum == num){
+
+            Resource_Type type = null;
+            int num = 0;
+
+            if (isBenchmarking) {
+                int[] typeNumPair = player.placeKnight(this);
+                type = Resources.resourcesList[typeNumPair[0]];
+                num = typeNumPair[1];
+
+            } else {
+                type = Resources.resourcesList[input.nextInt()];
+                num = input.nextInt();
+            }
+
+            for(Hex hex: hexes)  {
+                if(Resources.produce(hex.type) == type && hex.diceNum == num) {
                     if(hex.isBlocked){
                         System.out.println("Failed, must change a place");
                         break;

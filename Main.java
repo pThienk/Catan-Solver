@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 public class Main {
     static String str;
     public static void  main(String[] args) throws Exception {
-        Board catanBoard = new Board();
+        /** Board catanBoard = new Board();
         catanBoard.PrintBoard();
 
         Player player1 = new Player(1);
@@ -23,7 +23,14 @@ public class Main {
 
         catanBoard.GamePhase();
 
-        RunServer();
+        RunServer(); **/
+
+        Player p1 = new PlayerRandom(1, 111);
+        Player p2 = new PlayerWRandom(2, 133);
+
+        int[] scores = Benchmarking.benchmark(2 ,p1, p2);
+
+        System.out.println("Player 1 wins " + scores[0] + "Player 2 wins" + scores[1]);
 
     }
 

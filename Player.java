@@ -7,6 +7,7 @@ public class Player {
     List<Port> ports = new ArrayList<>();
     List<DevelopmentCard> devCards = new ArrayList<>();
     List<Resource_Type> resourcesAtHand = new ArrayList<>();
+    boolean hasWon = false;
 
     int knightUsed = 0;
     public int longestRoadConnection(){
@@ -115,14 +116,14 @@ public class Player {
 
     public void MakeMove(Board board){
         int pass = 0;
-        while(pass != -1){
+        while(pass != -1) {
             ArrayList<Action> actions = CheckPossibleMoves(board);
             for (int i = 0; i < actions.size(); i++) {
                 System.out.println("Action " + i + " : " + actions.get(i).toString());
             }
             System.out.println("Enter which action u want to take: ");
             int move = board.input.nextInt();
-            if(move == -1){
+            if(move == -1) {
                 System.out.println("Cheat Code");
                 this.resourcesAtHand.add(Resource_Type.Brick);
                 this.resourcesAtHand.add(Resource_Type.Wood);
@@ -133,7 +134,7 @@ public class Player {
                 System.out.println("resourceCount size: " + resourceCount.size());
                 System.out.println("hand size: " + resourcesAtHand.size());
                 pass = 1;
-            }else if(move == -2){
+            } else if(move == -2) {
                 System.out.println("Cheat Code");
                 System.out.println("hand size before: " + resourcesAtHand.size());
                 Map<Resource_Type, Integer> resourceCount = organizeResources();
@@ -144,8 +145,7 @@ public class Player {
                 }
                 System.out.println();
                 pass = 1;
-            }
-            else{
+            } else {
                 pass = Commit(actions.get(move), board);
             }
         }
@@ -219,5 +219,23 @@ public class Player {
         }
 
         return actions;
+    }
+
+    // For benchmarking
+    public int makeInitialSettlement(Board board) {
+        return 0;
+    }
+
+    // For benchmarking
+    public int makeInitialRoad(Board board, int spotNum) {
+        return 0;
+    }
+
+    public void discardCards(int num) {
+
+    }
+
+    public int[] placeKnight(Board board) {
+        return new int[] {};
     }
 }
