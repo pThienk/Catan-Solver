@@ -19,6 +19,8 @@ public class Benchmarking {
             benchmarkBoard.players.add(p1);
             benchmarkBoard.players.add(p2);
 
+            benchmarkBoard.PrintBoard();
+
             benchmarkBoard.SettlementPhase();
             benchmarkBoard.GamePhase();
 

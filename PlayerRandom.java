@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -23,7 +24,7 @@ public class PlayerRandom extends Player {
     @Override
     public void MakeMove(Board board) {
         // super.MakeMove(board);
-        ArrayList<Action> actions = super.CheckPossibleMoves(board);
+        ArrayList<Action> actions = new ArrayList<>(super.CheckPossibleMoves(board));
 
         while(!actions.isEmpty()) {
             int move = random.nextInt(actions.size());
@@ -46,11 +47,14 @@ public class PlayerRandom extends Player {
     @Override
     public int makeInitialRoad(Board board, int spotNum) {
 
-        System.out.println("Making road");
         List<Spot> availableSpots = board.spots.get(spotNum).adjacentSpots;
-        int roadInd = random.nextInt(availableSpots.size());
 
-        while(!board.CreateRoad(this, board.spots.get(spotNum), availableSpots.get(roadInd), false)) {
+       // System.out.println(availableSpots.size() + " " + spotNum);
+        int roadInd = random.nextInt(availableSpots.size());
+        //System.out.println(roadInd);
+
+        while(board.CreateRoad(this, board.spots.get(spotNum), availableSpots.get(roadInd), false)) {
+            availableSpots.remove(roadInd);
             roadInd = random.nextInt(availableSpots.size());
         }
 
@@ -61,7 +65,11 @@ public class PlayerRandom extends Player {
     public void discardCards(int num) {
 
         for (int i = 0; i < num; i++) {
-            super.resourcesAtHand.remove(random.nextInt(super.resourcesAtHand.size()));
+            if (!super.resourcesAtHand.isEmpty()) {
+                super.resourcesAtHand.remove(random.nextInt(super.resourcesAtHand.size()));
+            } else {
+                break;
+            }
         }
     }
 

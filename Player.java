@@ -175,9 +175,12 @@ public class Player {
     public ArrayList<Action> CheckPossibleMoves(Board board){
         ArrayList<Action> actions = new ArrayList<>();
         actions.add(new Action(null, null, null, Action_Type.Pass));
-        if(Trade(false)){
-            actions.add(new Action(null, null, null, Action_Type.Trade));
+        if (!board.isBenchmarking) {
+            if(Trade(false)){
+                actions.add(new Action(null, null, null, Action_Type.Trade));
+            }
         }
+
         if(board.BuyDevelopmentCard(this, board.round, false)){
             actions.add(new Action(null, null, null, Action_Type.BuyDevelopmentCard));
         }

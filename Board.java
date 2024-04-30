@@ -62,6 +62,7 @@ public class Board {
 
             if (isBenchmarking) {
                 spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
+                System.out.println("Road spot choose " + spotRoad);
             } else {
                 spotRoad = input.nextInt();
             }

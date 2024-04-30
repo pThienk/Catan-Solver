@@ -26,7 +26,7 @@ public class Main {
         RunServer(); **/
 
         Player p1 = new PlayerRandom(1, 111);
-        Player p2 = new PlayerWRandom(2, 133);
+        Player p2 = new PlayerWRandom(2, 113);
 
         int[] scores = Benchmarking.benchmark(2 ,p1, p2);
 
