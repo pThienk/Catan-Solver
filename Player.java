@@ -8,16 +8,11 @@ public class Player {
     List<DevelopmentCard> devCards = new ArrayList<>();
     List<Resource_Type> resourcesAtHand = new ArrayList<>();
     boolean hasWon = false;
-
     int knightUsed = 0;
-    public int longestRoadConnection(){
-        return 0;
-    }
 
     public Player(int id){
         this.id = id;
     }
-
     public boolean canBuy(Action_Type type){
         List<Resource_Type> cost = Resources.resourceCost.get(type);
         List<Resource_Type> hand = new ArrayList<>();
@@ -175,12 +170,9 @@ public class Player {
     public ArrayList<Action> CheckPossibleMoves(Board board){
         ArrayList<Action> actions = new ArrayList<>();
         actions.add(new Action(null, null, null, Action_Type.Pass));
-        if (!board.isBenchmarking) {
-            if(Trade(false)){
-                actions.add(new Action(null, null, null, Action_Type.Trade));
-            }
+        if(Trade(false)){
+            actions.add(new Action(null, null, null, Action_Type.Trade));
         }
-
         if(board.BuyDevelopmentCard(this, board.round, false)){
             actions.add(new Action(null, null, null, Action_Type.BuyDevelopmentCard));
         }

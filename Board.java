@@ -9,7 +9,7 @@ public class Board {
 
     public boolean isBenchmarking = false;
 
-    public Spot blockedSpot;
+    public Hex blockedHex;
     public int mostKnightAmount = 2;
     public Player largestArmy = null;
     public int longestRoadAmount = 4;
@@ -17,6 +17,7 @@ public class Board {
     public boolean isInitialSettlementPhase = true;
     public boolean devCardUsedThisRound = false;
     public int round;
+    public Dice dice = new Dice(false);
     public StringBuilder output = new StringBuilder(); // 用于收集输出数据的StringBuilder
 
     public Scanner input = new Scanner(System.in);
@@ -26,7 +27,6 @@ public class Board {
      */
     public Board(){
        CreateRandomBoard();
-
     }
 
     public Board(boolean isBenchmarking) {
@@ -56,6 +56,7 @@ public class Board {
                 }
                 success = CreateSettlement(players.get(i), spots.get(spotNum), true);
             }
+            System.out.println("Player " + players.get(i).id + " has picked spot: " + spotNum );
             System.out.println("Player " + players.get(i).id + " pick road.");
             //here the Player chooses the road
             int spotRoad;
@@ -102,6 +103,7 @@ public class Board {
                 }
                 success = CreateSettlement(players.get(i), spots.get(spotNum), true);
             }
+            System.out.println("Player " + players.get(i).id + " has picked spot: " + spotNum );
             //give the resources to the players.
             for (int j = 0; j < spots.get(spotNum).adjacentHexes.size(); j++) {
                 if(spots.get(spotNum).adjacentHexes.get(j).type == Hex_Type.Desert) continue;
@@ -136,25 +138,35 @@ public class Board {
     public void GamePhase() {
         round = 0;
         Player currentPlayer = players.get(round % players.size());
-        while (!CheckWin()){
+        while (!CheckWin(false)){
             devCardUsedThisRound = false;
             System.out.println("Round " + round + ", Player " + currentPlayer.id + "'s turn");
-            if(UseDevelopmentCard(currentPlayer, DevelopmentCard_Type.Knight, false)){
-                System.out.println("Do u want to use knight (0-no/1-yes)?");
-                int num = input.nextInt() % 2;
-                if(num == 1){
-                    UseDevelopmentCard(currentPlayer, DevelopmentCard_Type.Knight, true);
-                }
-            }
+//            if(UseDevelopmentCard(currentPlayer, DevelopmentCard_Type.Knight, false)){
+//                System.out.println("Do u want to use knight (0-no/1-yes)?");
+//                int num = input.nextInt() % 2;
+//                if(num == 1){
+//                    UseDevelopmentCard(currentPlayer, DevelopmentCard_Type.Knight, true);
+//                }
+//            }
             DiceRoll(currentPlayer);
             //here the player makes the move;
             currentPlayer.MakeMove(this);
-            PrintBoard();
+            if(round % 10 == 0){
+//                PrintBoard();
+                CheckWin(true);
+            }
+            if(round >= 1000){
+                CheckWin(true);
+                break;
+            }
             round++;
             currentPlayer = players.get(round % players.size());
         }
+        PrintBoard();
+        CheckWin(true);
+        System.out.println("GAME ENDS");
     }
-    public boolean CheckWin(){
+    public boolean CheckWin(boolean print){
         for (Player player: players) {
             int VP = 0;
             if(largestArmy != null && player.id == largestArmy.id) VP += 2;
@@ -166,6 +178,9 @@ public class Board {
             for (int i = 0; i < player.devCards.size(); i++) {
                 if (player.devCards.get(i).type == DevelopmentCard_Type.VictoryPoint) VP += 1;
             }
+            if(print){
+                System.out.println("Player " + player.id + " has " + VP + " VP");
+            }
             if(VP >= 15) {
                 player.hasWon = true;
                 return true;
@@ -174,12 +189,9 @@ public class Board {
         return false;
     }
     public void DiceRoll(Player player){
-        int a = random.nextInt(6) + 1;
-        int b = random.nextInt(6) + 1;
-        int diceRoll = a + b;
+        int diceRoll = dice.Roll();
         System.out.println("A " + diceRoll + " is rolled");
         if(diceRoll == 7) {
-
             for (Player tempPlayer: players) {
                 if(tempPlayer.resourcesAtHand.size() > 9){
                     System.out.println("!!!You HAVE TO DISCARD!!!");
@@ -218,7 +230,9 @@ public class Board {
                         System.out.println("Failed, must change a place");
                         break;
                     }
+                    if(blockedHex != null) blockedHex.isBlocked = false;
                     hex.isBlocked = true;
+                    blockedHex = hex;
                     Player playerToStealFrom = null;
                     for (int i = 0; i < players.size(); i++) {
                         if(player.id != players.get(i).id){
@@ -257,6 +271,11 @@ public class Board {
         if(!spot.hasSettlement) return false;
         if(!player.canBuy(Action_Type.UpGradeCity)) return false;
         if(spot.settlement.isCity) return false;
+        int cityNum = 0;
+        for (int i = 0; i < player.settlements.size(); i++) {
+            if(player.settlements.get(i).isCity) cityNum ++;
+        }
+        if(cityNum >= 4) return false;
         if(actuallyUpgrade){
             player.Buy(Action_Type.UpGradeCity);
             spot.settlement.isCity = true;
@@ -285,10 +304,12 @@ public class Board {
     }
     public boolean CreateRoad(Player player, Spot spot1, Spot spot2, boolean actuallyCreate){
         if(spot1.id == spot2.id) return false;
+        if(player.roads.size() >= 15) return false;
         if(isInitialSettlementPhase){
             if(!spot1.adjacentSpots.contains(spot2)) return false;
             if(actuallyCreate){
                 Road road = new Road(player, spot1, spot2, roads.size());
+                player.roads.add(road);
                 roads.add(road);
                 spot1.spotsConnectedByRoad.put(spot2, player.id);
                 spot2.spotsConnectedByRoad.put(spot1, player.id);
@@ -304,10 +325,16 @@ public class Board {
             //check if the road is connected to a road or a settlement
             int roadConnected = 0;
             for (Spot spot: spot1.spotsConnectedByRoad.keySet()) {
-                if(spot1.spotsConnectedByRoad.get(spot) == player.id) roadConnected++;
+                if(spot1.spotsConnectedByRoad.get(spot) == player.id){
+                    if(spot1.hasSettlement && spot1.settlement.playerOwned.id != player.id) continue;
+                    roadConnected++;
+                }
             }
             for (Spot spot: spot2.spotsConnectedByRoad.keySet()) {
-                if(spot2.spotsConnectedByRoad.get(spot) == player.id) roadConnected++;
+                if(spot2.spotsConnectedByRoad.get(spot) == player.id){
+                    if(spot2.hasSettlement && spot2.settlement.playerOwned.id != player.id) continue;
+                    roadConnected++;
+                }
             }
             if(roadConnected == 0){return false;}
             //create the road
@@ -315,6 +342,7 @@ public class Board {
                 player.Buy(Action_Type.BuildRoad);
                 Road road = new Road(player, spot1, spot2, roads.size());
                 roads.add(road);
+                player.roads.add(road);
                 spot1.spotsConnectedByRoad.put(spot2, player.id);
                 spot2.spotsConnectedByRoad.put(spot1, player.id);
                 //UpdateLongestRoad
@@ -338,24 +366,27 @@ public class Board {
                         }
                     }
                     longestConnection = max + max2;
-                    System.out.println("You currently have longest connection of: " + longestConnection);
+//                    System.out.println("You currently have longest connection of: " + longestConnection);
                     if(longestConnection > longestRoadAmount){
                         longestRoadAmount = longestConnection;
                         longestRoad = player;
                         System.out.println("New Longest Road Record! The current best is " + longestRoadAmount + " roads.");
                     }
                 }
-
+                return true;
             }
             return true;
         }
-        return false;
+        return true;
     }
     public int FindLongestRoad(Spot spot, boolean[] visited, int playerID){
 
         visited[spot.id] = true;
         for (Spot next: spot.spotsConnectedByRoad.keySet()) {
             if(playerID == spot.spotsConnectedByRoad.get(next)){
+                if(spot.hasSettlement && spot.settlement.playerOwned.id != playerID){
+                    return 0;
+                }
                 if(!visited[next.id]){
                     return 1 + FindLongestRoad(next, visited, playerID);
                 }
@@ -367,6 +398,7 @@ public class Board {
     public boolean CreateSettlement(Player player, Spot spot, boolean actuallyCreate){
         if(isInitialSettlementPhase){
             //check adj spots
+            if(spot.hasSettlement) return false;
             for (int i = 0; i < spot.adjacentSpots.size(); i++) {
                 if(spot.adjacentSpots.get(i).hasSettlement) return false;
             }
@@ -382,7 +414,11 @@ public class Board {
             return true;
         }else{
             //check if road connects
-            if(spot.spotsConnectedByRoad.isEmpty()) return false;
+            int count = 0;
+            for (Spot next: spot.spotsConnectedByRoad.keySet()) {
+                if(spot.spotsConnectedByRoad.get(next) == player.id) count++;
+            }
+            if(count == 0) return false;
             if(spot.hasSettlement) return false;
             //check if resource allows
             if(!player.canBuy(Action_Type.BuildSettlement)) return false;
@@ -632,15 +668,19 @@ public class Board {
                 System.out.print("o ");
             }
             if(i < spots.size() - 1 && spots.get(i).spotsConnectedByRoad.get(spots.get(i+1)) != null){
-                System.out.print("-");
+                //if(spots.get(i).spotsConnectedByRoad.get(spots.get(i+1)) == 2)
+                    System.out.print("-");
+                //else System.out.print(" ");
             }else{
                 System.out.print(" ");
             }
             boolean hasDownwardRoad = false;
             for (Spot spot: spots.get(i).spotsConnectedByRoad.keySet()) {
                 if(spot.id > spots.get(i).id + 1){
-                    hasDownwardRoad = true;
-                    break;
+                    //if(spots.get(i).spotsConnectedByRoad.get(spots.get(i+1)) != null && (spots.get(i).spotsConnectedByRoad.get(spots.get(i+1)) == 2)){
+                        hasDownwardRoad = true;
+                        break;
+                    //}
                 }
             }
             if(hasDownwardRoad)downwardRoad += "|  ";
@@ -649,8 +689,9 @@ public class Board {
             if(i == Spot.Spot_Alignment[index] - 1){
                 System.out.println();
                 int spaceNum = 0;
-                if(index == 0 || index == 3) spaceNum = 3;
-                else if(index == 4) spaceNum = 6;
+
+                if(index == 0 || index == 4) spaceNum = 3;
+                else if(index == 1 ) spaceNum = 3;
                 for (int j = 0; j < spaceNum; j++) {
                     System.out.print(" ");
                 }
@@ -658,6 +699,10 @@ public class Board {
                 System.out.print(downwardRoad);
                 downwardRoad = "";
                 System.out.println();
+
+                spaceNum = 0;
+                if(index == 0 || index == 3) spaceNum = 3;
+                else if(index == 4) spaceNum = 6;
                 for (int j = 0; j < spaceNum; j++) {
                     System.out.print(" ");
                 }

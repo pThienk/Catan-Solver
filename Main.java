@@ -25,12 +25,9 @@ public class Main {
 
         RunServer(); **/
 
-        Player p1 = new PlayerRandom(1, 111);
-        Player p2 = new PlayerWRandom(2, 113);
+        int[] scores = Benchmarking.benchmark(100);
 
-        int[] scores = Benchmarking.benchmark(2 ,p1, p2);
-
-        System.out.println("Player 1 wins " + scores[0] + "Player 2 wins" + scores[1]);
+        System.out.println("Player 1 wins " + scores[0] + " games, Player 2 wins " + scores[1] + " games");
 
     }
 

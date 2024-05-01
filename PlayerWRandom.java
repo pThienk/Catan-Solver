@@ -1,18 +1,18 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class PlayerWRandom extends Player {
 
-    public static final double STONE_VALUE = 9.26;
-    public static final double WHEAT_VALUE = 10.06;
-    public static final double SHEEP_VALUE = 5.26;
-    public static final double TREE_VALUE = 8.2;
-    public static final double BRICK_VALUE = 8.2;
+    public static double ORE_VALUE = 9.26;
+    public static double WHEAT_VALUE = 10.06;
+    public static double SHEEP_VALUE = 5.26;
+    public static double TREE_VALUE = 8.2;
+    public static double BRICK_VALUE = 8.2;
+    public static int[] HEX_NUM_VALUE = {
+            -1, -1, 1, 2, 3, 4, 5, 0, 5, 4, 3, 2, 1
+    };    // 0, 1, 2, 3, ..., 12
 
     int randSeed;
-    public static final double[] DISCRETE_POISSON = {};
+    public static double[] DISCRETE_POISSON = {};
 
     Random random;
 
@@ -99,15 +99,15 @@ public class PlayerWRandom extends Player {
 
             for (Hex hex : spot.adjacentHexes) {
                 if (hex.type == Hex_Type.Brick) {
-                    spotValue += BRICK_VALUE;
+                    spotValue += BRICK_VALUE * HEX_NUM_VALUE[hex.diceNum];
                 } else if (hex.type == Hex_Type.Wood) {
-                    spotValue += TREE_VALUE;
+                    spotValue += TREE_VALUE * HEX_NUM_VALUE[hex.diceNum];
                 } else if (hex.type == Hex_Type.Sheep) {
-                    spotValue += SHEEP_VALUE;
+                    spotValue += SHEEP_VALUE * HEX_NUM_VALUE[hex.diceNum];
                 } else if (hex.type == Hex_Type.Wheat) {
-                    spotValue += WHEAT_VALUE;
+                    spotValue += WHEAT_VALUE * HEX_NUM_VALUE[hex.diceNum];
                 } else if (hex.type == Hex_Type.Ore) {
-                    spotValue += STONE_VALUE;
+                    spotValue += ORE_VALUE* HEX_NUM_VALUE[hex.diceNum];
                 }
             }
 
@@ -134,13 +134,47 @@ public class PlayerWRandom extends Player {
         // System.out.println(availableSpots.size() + " " + spotNum);
         int roadInd = random.nextInt(availableSpots.size());
         //System.out.println(roadInd);
-
-        while(board.CreateRoad(this, board.spots.get(spotNum), availableSpots.get(roadInd), false)) {
-            availableSpots.remove(roadInd);
-            roadInd = random.nextInt(availableSpots.size());
-        }
+//
+//        while(board.CreateRoad(this, board.spots.get(spotNum), availableSpots.get(roadInd), false)) {
+//            availableSpots.remove(roadInd);
+//            roadInd = random.nextInt(availableSpots.size());
+//        }
 
         return availableSpots.get(roadInd).id;
+    }
+
+    public boolean Trade(boolean actuallyTrade){
+        HashMap<Resource_Type, Integer> canTradeDIct = findTradingOptions();
+        if(canTradeDIct.isEmpty()){
+            return false;
+        }
+        if(actuallyTrade){
+            int rand = random.nextInt(canTradeDIct.keySet().size());
+            Resource_Type resOUT = null;
+            int index = 0;
+            for (Resource_Type type: canTradeDIct.keySet()) {
+//                System.out.println("You can trade " + type);
+                if(index == rand){
+                    resOUT = type;
+                    break;
+                }
+                index ++;
+            }
+
+            int randIN = random.nextInt(Resources.resourcesList.length);
+            Resource_Type resIN = Resources.resourcesList[randIN];
+
+            while(resIN == resOUT){
+                randIN = random.nextInt(Resources.resourcesList.length);
+                resIN = Resources.resourcesList[randIN];
+            }
+            for (int i = 0; i < canTradeDIct.get(resOUT); i++) {
+                resourcesAtHand.remove(resOUT);
+            }
+            resourcesAtHand.add(resIN);
+            System.out.println("Traded "  + resIN + " for " + resOUT);
+        }
+        return true;
     }
 
     @Override
