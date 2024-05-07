@@ -8,16 +8,17 @@ public class Benchmarking {
         return player.makeInitialRoad(board, settlementSpot);
     }
 
-    public static int[] benchmark(int gameNum) {
+    public static int[] benchmark(int gameNum, int p1Seed, int p2Seed, int boardSeed) {
 
         int p1WonNum = 0;
         int p2WonNum = 0;
+        int discardGames = 0;
 
         for (int gameInd = 0; gameInd < gameNum; gameInd++) {
-            Player p1 = new PlayerRandom(1, 111);
-            Player p2 = new PlayerWRandom(2, 113);
+            Player p1 = new PlayerRandom(1, p1Seed);
+            Player p2 = new PlayerWRandom(2, p2Seed);
 
-            Board benchmarkBoard = new Board(true);
+            Board benchmarkBoard = new Board(true, boardSeed);
             int rand = benchmarkBoard.random.nextInt(2);
             if(rand > 0){
                 benchmarkBoard.players.add(p1);
@@ -39,13 +40,14 @@ public class Benchmarking {
                 p2WonNum++;
             }else{
                 System.out.println("No one won");
+                discardGames++;
             }
 
             p1.hasWon = false;
             p2.hasWon = false;
         }
 
-        return new int[] {p1WonNum, p2WonNum};
+        return new int[] {p1WonNum, p2WonNum, discardGames};
     }
 
 }

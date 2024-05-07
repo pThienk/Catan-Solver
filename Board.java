@@ -16,12 +16,17 @@ public class Board {
     public Player longestRoad = null;
     public boolean isInitialSettlementPhase = true;
     public boolean devCardUsedThisRound = false;
+
+    public Player currentPlayer;
     public int round;
     public Dice dice = new Dice(false);
     public StringBuilder output = new StringBuilder(); // 用于收集输出数据的StringBuilder
 
     public Scanner input = new Scanner(System.in);
-    public Random random = new Random();
+    public Random random;
+
+    public int randSeed;
+
     /**
      * Generates a Random Board
      */
@@ -32,7 +37,16 @@ public class Board {
     public Board(boolean isBenchmarking) {
         CreateRandomBoard();
         this.isBenchmarking = isBenchmarking;
+        random = new Random();
     }
+
+    public Board(boolean isBenchmarking, int randSeed) {
+        CreateRandomBoard();
+        this.isBenchmarking = isBenchmarking;
+        this.randSeed = randSeed;
+        random = new Random(randSeed);
+    }
+
     public void SettlementPhase(){
         for (int i = 0; i < players.size(); i++) {
             System.out.println("Player " + players.get(i).id + " pick spot.");
@@ -63,7 +77,7 @@ public class Board {
 
             if (isBenchmarking) {
                 spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
-                System.out.println("Road spot choose " + spotRoad);
+                //System.out.println("Road spot choose " + spotRoad);
             } else {
                 spotRoad = input.nextInt();
             }
@@ -137,7 +151,7 @@ public class Board {
     }
     public void GamePhase() {
         round = 0;
-        Player currentPlayer = players.get(round % players.size());
+        currentPlayer = players.get(round % players.size());
         while (!CheckWin(false)){
             devCardUsedThisRound = false;
             System.out.println("Round " + round + ", Player " + currentPlayer.id + "'s turn");

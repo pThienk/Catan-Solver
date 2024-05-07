@@ -36,11 +36,13 @@ public class PlayerWRandom extends Player {
         ArrayList<Action> actions = new ArrayList<>(super.CheckPossibleMoves(board));
 
         int meanInd = 0;
-        double stdDev = actions.size() / 4.0;
 
         int pass = 0;
 
         while ((pass != -1 || actions.size() > 1) && meanInd != -1) {
+
+            double stdDev = actions.size() / 4.0;
+
             for (Action action : actions) {
                 if (action.actionType == Action_Type.UpGradeCity) {
                     meanInd = actions.indexOf(action);
