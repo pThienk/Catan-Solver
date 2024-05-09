@@ -15,8 +15,8 @@ public class Benchmarking {
         int discardGames = 0;
 
         for (int gameInd = 0; gameInd < gameNum; gameInd++) {
-            Player p1 = new PlayerRandom(1, p1Seed);
-            Player p2 = new PlayerWRandom(2, p2Seed);
+            Player p1 = new PlayerRandom(1, "bot", p1Seed);
+            Player p2 = new PlayerWRandom(2, "bot", p2Seed);
 
             Board benchmarkBoard = new Board(true, boardSeed);
             int rand = benchmarkBoard.random.nextInt(2);

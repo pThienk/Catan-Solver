@@ -14,8 +14,8 @@ public class PlayerMinMax extends Player {
 
     public Random random;
 
-    public PlayerMinMax(int id, int randSeed) {
-        super(id);
+    public PlayerMinMax(int id, String tag, int randSeed) {
+        super(id, tag);
         this.randSeed = randSeed;
         random = new Random(randSeed);
     }

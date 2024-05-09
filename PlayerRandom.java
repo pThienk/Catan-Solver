@@ -3,8 +3,8 @@ import java.util.*;
 public class PlayerRandom extends Player {
     private Random random;
     private int randSeed;
-    public PlayerRandom(int id, int randSeed) {
-        super(id);
+    public PlayerRandom(int id, String tag, int randSeed) {
+        super(id, tag);
         this.randSeed = randSeed;
         random = new Random(this.randSeed);
     }

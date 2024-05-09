@@ -16,8 +16,8 @@ public class PlayerWRandom extends Player {
 
     Random random;
 
-    public PlayerWRandom(int id, int randSeed) {
-        super(id);
+    public PlayerWRandom(int id, String tag, int randSeed) {
+        super(id, tag);
         random = new Random(randSeed);
         this.randSeed = randSeed;
     }

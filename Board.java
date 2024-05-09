@@ -53,7 +53,7 @@ public class Board {
             //here the Player chooses the spots
 
             int spotNum;
-            if (isBenchmarking) {
+            if (isBenchmarking || players.get(i).tag.equals("bot")) {
                 spotNum = Benchmarking.getInitialSettlement(players.get(i), this);
             } else {
                 spotNum = input.nextInt() % 54;
@@ -63,7 +63,7 @@ public class Board {
             while(!success){
                 System.out.println("Failed, Try Another Spot");
 
-                if (isBenchmarking) {
+                if (isBenchmarking || players.get(i).tag.equals("bot")) {
                     spotNum = Benchmarking.getInitialSettlement(players.get(i), this);
                 } else {
                     spotNum = input.nextInt();
@@ -75,7 +75,7 @@ public class Board {
             //here the Player chooses the road
             int spotRoad;
 
-            if (isBenchmarking) {
+            if (isBenchmarking || players.get(i).tag.equals("bot")) {
                 spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
                 //System.out.println("Road spot choose " + spotRoad);
             } else {
@@ -86,7 +86,7 @@ public class Board {
             while(!success){
                 System.out.println("Failed, Try Another road");
 
-                if (isBenchmarking) {
+                if (isBenchmarking || players.get(i).tag.equals("bot")) {
                     spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
                 } else {
                     spotRoad = input.nextInt();
@@ -100,7 +100,7 @@ public class Board {
             //here the Player chooses the spots
             int spotNum;
 
-            if (isBenchmarking) {
+            if (isBenchmarking || players.get(i).tag.equals("bot")) {
                 spotNum = Benchmarking.getInitialSettlement(players.get(i), this);
             } else {
                 spotNum = input.nextInt() % 54;
@@ -110,7 +110,7 @@ public class Board {
             while(!success){
                 System.out.println("Failed, Try Another Spot");
 
-                if (isBenchmarking) {
+                if (isBenchmarking || players.get(i).tag.equals("bot")) {
                     spotNum = Benchmarking.getInitialSettlement(players.get(i), this);
                 } else {
                     spotNum = input.nextInt();
@@ -128,7 +128,7 @@ public class Board {
             //here the Player chooses the raod`
 
             int spotRoad;
-            if (isBenchmarking) {
+            if (isBenchmarking || players.get(i).tag.equals("bot")) {
                 spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
             } else {
                 spotRoad = input.nextInt();
@@ -138,7 +138,7 @@ public class Board {
             while(!success){
                 System.out.println("Failed, Try Another road");
 
-                if (isBenchmarking) {
+                if (isBenchmarking || players.get(i).tag.equals("bot")) {
                     spotRoad = Benchmarking.getRoadPlacement(players.get(i), spotNum, this);
                 } else {
                     spotRoad = input.nextInt();
@@ -214,7 +214,7 @@ public class Board {
 
                     int discardNum = (tempPlayer.resourcesAtHand.size() / 2);
                     for (int i = 0; i < discardNum; i++) {
-                        if (isBenchmarking) {
+                        if (isBenchmarking || players.get(i).tag.equals("bot")) {
                             player.discardCards(discardNum);
                         } else {
                             int res = input.nextInt();
@@ -228,7 +228,7 @@ public class Board {
             Resource_Type type = null;
             int num = 0;
 
-            if (isBenchmarking) {
+            if (isBenchmarking || player.tag.equals("bot")) {
                 int[] typeNumPair = player.placeKnight(this);
                 type = Resources.resourcesList[typeNumPair[0]];
                 num = typeNumPair[1];

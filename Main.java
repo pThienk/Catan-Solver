@@ -32,18 +32,36 @@ public class Main {
         //System.out.println("Player 1 wins " + scores[0] + " games, Player 2 wins " + scores[1] + " games" +
         //        ", Nobody won for " + scores[2] + " games");
 
-        double[] stats = getBenchmarkStatistics(100, 100, true);
+        //double[] stats = getBenchmarkStatistics(100, 100, true);
 
-        System.out.println("P1 wins an avg of " + stats[0] + " percent, with StdDEV "+ stats[1] + ". P2 wins an avg of " +
-               stats[2] + " percent, with StdDEV " + stats[3]);
+        //System.out.println("P1 wins an avg of " + stats[0] + " percent, with StdDEV "+ stats[1] + ". P2 wins an avg of " +
+              // stats[2] + " percent, with StdDEV " + stats[3]);
+
+        runPvBotGame();
     }
 
     public static void runPvPGame() {
         Board catanBoard = new Board();
         catanBoard.PrintBoard();
 
-        Player player1 = new Player(1);
-        Player player2 = new Player(2);
+        Player player1 = new Player(1, "human");
+        Player player2 = new Player(2, "human");
+        catanBoard.players.add(player1);
+        catanBoard.players.add(player2);
+
+        //6 14 30 31 45 44 24 35
+        catanBoard.SettlementPhase();
+        catanBoard.PrintBoard();
+
+        catanBoard.GamePhase();
+    }
+
+    public static void runPvBotGame() {
+        Board catanBoard = new Board();
+        catanBoard.PrintBoard();
+
+        Player player1 = new Player(1, "human");
+        Player player2 = new PlayerWRandom(2, "bot", 1134);
         catanBoard.players.add(player1);
         catanBoard.players.add(player2);
 
