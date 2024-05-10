@@ -8,7 +8,7 @@ public class PlayerMinMax extends Player {
     public static final int MAX_SEARCH_TIME_SECS = 20;
 
     private int depth;
-    private boolean prunning;
+    private boolean pruning;
     private double epsilon;
     public int randSeed;
 
@@ -20,99 +20,123 @@ public class PlayerMinMax extends Player {
         random = new Random(randSeed);
     }
 
-    public void init(int depth, double epsilon, boolean prunning) {
+    public void init(int depth, double epsilon, boolean pruning) {
         this.depth = depth;
         this.epsilon = epsilon;
-        this.prunning = prunning;
+        this.pruning = pruning;
     }
 
-    public int[] alphaBetaAction(Board board, int depth, double alpha, double beta, long deadline,
+    public ArrayList<Tuple<Action, ArrayList<Tuple<Board, Double>>>> expandSpectrum(ArrayList<Action> actions, Board board) {
+        return null;
+    }
+
+    public Tuple<Action, Double> alphaBetaAction(Board board, int depth, double alpha, double beta, long deadline,
                                              StateNode node) {
 
         if (depth == 0 || board.CheckWin(false) || System.nanoTime() >= deadline) {
-            int value = 0; //value_function(board, this.id)
+            double value = 0; //value_function(board, this.id)
             node.nodeValue = value;
-            return new int[] {-1, value};
+
+            return new Tuple<>(null, value);
         }
 
         boolean maximizingPlayer = (board.currentPlayer == this);
         ArrayList<Action> actions = getActions(board);
-        Map<Action, ArrayList<Map<Board, Double>>> actionsOutcomes = null; // = expand_nodes(actions, board)
+        ArrayList<Tuple<Action, ArrayList<Tuple<Board, Double>>>> actionsOutcomes = expandSpectrum(actions, board);
 
         if (maximizingPlayer) {
-            int bestAction = -1;
+            Action bestAction = null;
             double bestValue = -Double.MAX_VALUE;
 
-            for (Action action : actionsOutcomes.keySet()) {
-                ActionNode aNode = new ActionNode(action);
+            for (Tuple<Action, ArrayList<Tuple<Board, Double>>> actionOutcome : actionsOutcomes) {
+                ActionNode aNode = new ActionNode(actionOutcome.getFirstElement());
                 double nodeValue = 0;
 
-                for (Map<Board, Double> map : actionsOutcomes.get(action)) {
+                for (Tuple<Board, Double> outcome : actionOutcome.getSecondElement()) {
+
+                    StateNode outNode = new StateNode(outcome.getFirstElement().currentPlayer.id);
 
 
-                    // What the f--k do I do here?
+                    Tuple<Action, Double> result = alphaBetaAction(
+                        outcome.getFirstElement(), depth - 1, alpha, beta, deadline, outNode
+                    );
 
-                    // StateNode outNode = new StateNode(outcome.playerId)
+                    double value = result.getSecondElement();
+                    nodeValue += outcome.getSecondElement() * value;
 
-                    /*
-                    double [] result = alphabetaAction(
-                        outcome, depth - 1, alpha, beta, deadline, outNode
-                    )
-                    value = result[1]
-                    expected_value += proba * value
-
-                    action_node.children.add(outNode)
-                    action_node.probs.add(prob)
-                    */
+                    aNode.children.add(outNode);
+                    aNode.probs.add(outcome.getSecondElement());
 
                 }
 
-                /*
-                action_node.nodeValue = nodeValue;
-                node.children.add(action_node);
+
+                aNode.nodeValue = nodeValue;
+                node.children.add(aNode);
 
                 if (nodeValue > bestValue) {
-                    bestAction = action;
+                    bestAction = actionOutcome.getFirstElement();
                     bestValue = nodeValue;
-                   }
-                alpha = Math.max(alpha, bestValue)
+                }
+                alpha = Math.max(alpha, bestValue);
                 if (alpha >= beta) {
-                     break;  # beta cutoff
-                   }
-                */
+                     break;
+                }
+
             }
 
-            //node.nodeValue = bestValue
-            //return new double[] {best_action, best_value}
+            node.nodeValue = bestValue;
+            return new Tuple<>(bestAction, bestValue);
         } else {
 
-            // Same stuff until:
+            Action bestAction = null;
+            double bestValue = Double.MAX_VALUE;
 
-            /*
-                ...
-                   if (nodeValue < bestValue) {
-                    bestAction = action
-                    bestValue = nodeValue
+            for (Tuple<Action, ArrayList<Tuple<Board, Double>>> actionOutcome : actionsOutcomes) {
+                ActionNode aNode = new ActionNode(actionOutcome.getFirstElement());
+                double nodeValue = 0;
+
+                for (Tuple<Board, Double> outcome : actionOutcome.getSecondElement()) {
+
+                    StateNode outNode = new StateNode(outcome.getFirstElement().currentPlayer.id);
+
+
+                    Tuple<Action, Double> result = alphaBetaAction(
+                            outcome.getFirstElement(), depth - 1, alpha, beta, deadline, outNode
+                    );
+
+                    double value = result.getSecondElement();
+                    nodeValue += outcome.getSecondElement() * value;
+
+                    aNode.children.add(outNode);
+                    aNode.probs.add(outcome.getSecondElement());
+
                 }
-                beta = Math.min(beta, bestValue)
-                if beta <= alpha:
-                    break;  # alpha cutoff
-            }
-            node.nodeValue = bestValue;
-            return bestAction, bestValue;
 
-            */
+
+                aNode.nodeValue = nodeValue;
+                node.children.add(aNode);
+
+                if (nodeValue < bestValue) {
+                    bestAction = actionOutcome.getFirstElement();
+                    bestValue = nodeValue;
+                }
+                alpha = Math.max(alpha, bestValue);
+                if (alpha <= beta) {
+                    break;
+                }
+
+            }
+
+            node.nodeValue = bestValue;
+            return new Tuple<>(bestAction, bestValue);
 
         }
-
-
-        return null;
     }
 
     public ArrayList<Action> getActions(Board board) {
         ArrayList<Action> actions = null;
-        if (prunning) {
-            // actions = list_prunned_actions(board)
+        if (pruning) {
+            // actions = list_pruned_actions(board)
         } else {
             actions = new ArrayList<>(super.CheckPossibleMoves(board));
         }
@@ -134,17 +158,17 @@ public class PlayerMinMax extends Player {
         }
 
         long start_t = System.nanoTime();
-        int stateId = actions.size();
+        //int stateId = actions.size();
         StateNode node = new StateNode(board.currentPlayer.id);
         long deadline = (long) ( start_t + MAX_SEARCH_TIME_SECS * Math.floor(1e9) );
 
-        int[] resultAction = alphaBetaAction(board, ALPHA_DEFAULT_DEPTH, Double.MAX_VALUE, -Double.MAX_VALUE,
+        Tuple<Action, Double> resultAction = alphaBetaAction(board, ALPHA_DEFAULT_DEPTH, Double.MAX_VALUE, -Double.MAX_VALUE,
                 deadline, node);
 
-        if (resultAction[0] == -1) {
+        if (resultAction.getFirstElement() == null) {
             makeWRandomMove(board);
         } else {
-            Commit(super.CheckPossibleMoves(board).get(resultAction[0]), board);
+            Commit(resultAction.getFirstElement(), board);
         }
     }
 

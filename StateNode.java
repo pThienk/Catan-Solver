@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class StateNode {
@@ -9,5 +10,6 @@ public class StateNode {
 
     public StateNode(int playerId) {
         this.playerId = playerId;
+        children = new ArrayList<>();
     }
 }
