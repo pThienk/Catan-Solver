@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 public class PlayerMinMax extends Player {
@@ -220,7 +221,37 @@ public class PlayerMinMax extends Player {
 
     @Override
     public boolean Trade(boolean actuallyTrade) {
-       return super.Trade(actuallyTrade);
+        HashMap<Resource_Type, Integer> canTradeDIct = findTradingOptions();
+        if(canTradeDIct.isEmpty()){
+            return false;
+        }
+        if(actuallyTrade){
+            int rand = random.nextInt(canTradeDIct.keySet().size());
+            Resource_Type resOUT = null;
+            int index = 0;
+            for (Resource_Type type: canTradeDIct.keySet()) {
+//                System.out.println("You can trade " + type);
+                if(index == rand){
+                    resOUT = type;
+                    break;
+                }
+                index ++;
+            }
+
+            int randIN = random.nextInt(Resources.resourcesList.length);
+            Resource_Type resIN = Resources.resourcesList[randIN];
+
+            while(resIN == resOUT){
+                randIN = random.nextInt(Resources.resourcesList.length);
+                resIN = Resources.resourcesList[randIN];
+            }
+            for (int i = 0; i < canTradeDIct.get(resOUT); i++) {
+                resourcesAtHand.remove(resOUT);
+            }
+            resourcesAtHand.add(resIN);
+            System.out.println("Traded "  + resIN + " for " + resOUT);
+        }
+        return true;
     }
 
     @Override
