@@ -21,17 +21,41 @@ public class Board {
     public int round;
     public Dice dice = new Dice(false);
     public StringBuilder output = new StringBuilder(); // 用于收集输出数据的StringBuilder
-
     public Scanner input = new Scanner(System.in);
     public Random random;
-
     public int randSeed;
+    public boolean isDiceRolled = false;
 
     /**
      * Generates a Random Board
      */
     public Board(){
        CreateRandomBoard();
+       random = new Random();
+    }
+
+    public Board(Board otherBoard) {
+        this.hexes = new ArrayList<>(otherBoard.hexes);
+        this.spots = new ArrayList<>(otherBoard.spots);
+        this.settlements = new ArrayList<>(otherBoard.settlements);
+        this.roads = new ArrayList<>(otherBoard.roads);
+        this.players = new ArrayList<>(otherBoard.players);
+        this.isBenchmarking = otherBoard.isBenchmarking;
+        this.blockedHex = otherBoard.blockedHex;
+        this.mostKnightAmount = otherBoard.mostKnightAmount;
+        this.largestArmy = otherBoard.largestArmy;
+        this.longestRoadAmount = otherBoard.longestRoadAmount;
+        this.longestRoad = otherBoard.longestRoad;
+        this.isInitialSettlementPhase = otherBoard.isInitialSettlementPhase;
+        this.devCardUsedThisRound = otherBoard.devCardUsedThisRound;
+        this.currentPlayer = otherBoard.currentPlayer;
+        this.round = otherBoard.round;
+        this.dice = new Dice(otherBoard.dice);
+        this.output = new StringBuilder(otherBoard.output);
+        this.input = new Scanner(System.in);
+        this.random = new Random(otherBoard.randSeed);
+        this.randSeed = otherBoard.randSeed;
+        this.isDiceRolled = otherBoard.isDiceRolled;
     }
 
     public Board(boolean isBenchmarking) {
@@ -166,7 +190,7 @@ public class Board {
             //here the player makes the move;
             currentPlayer.MakeMove(this);
             if(round % 10 == 0){
-//                PrintBoard();
+                PrintBoard();
                 CheckWin(true);
             }
             if(round >= 1000){
@@ -175,6 +199,7 @@ public class Board {
             }
             round++;
             currentPlayer = players.get(round % players.size());
+            isDiceRolled = false;
         }
         PrintBoard();
         CheckWin(true);
@@ -203,6 +228,7 @@ public class Board {
         return false;
     }
     public void DiceRoll(Player player){
+        this.isDiceRolled = true;
         int diceRoll = dice.Roll();
         System.out.println("A " + diceRoll + " is rolled");
         if(diceRoll == 7) {

@@ -7,6 +7,10 @@ public class Dice {
         this.isBalanced = isBalanced;
     }
 
+    public Dice(Dice dice) {
+        this.isBalanced = dice.isBalanced;
+    }
+
     public int Roll(){
         int a = random.nextInt(6) + 1;
         int b = random.nextInt(6) + 1;

@@ -15,6 +15,17 @@ public class Player {
         this.id = id;
         this.tag = tag;
     }
+
+    public Player getEnemy(Board board) {
+        for (Player p : board.players) {
+            if (p != this) {
+                return p;
+            }
+        }
+
+        return null;
+    }
+
     public boolean canBuy(Action_Type type){
         List<Resource_Type> cost = Resources.resourceCost.get(type);
         List<Resource_Type> hand = new ArrayList<>();

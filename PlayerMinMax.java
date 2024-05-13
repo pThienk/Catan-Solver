@@ -26,10 +26,6 @@ public class PlayerMinMax extends Player {
         this.pruning = pruning;
     }
 
-    public ArrayList<Tuple<Action, ArrayList<Tuple<Board, Double>>>> expandSpectrum(ArrayList<Action> actions, Board board) {
-        return null;
-    }
-
     public Tuple<Action, Double> alphaBetaAction(Board board, int depth, double alpha, double beta, long deadline,
                                              StateNode node) {
 
@@ -42,7 +38,7 @@ public class PlayerMinMax extends Player {
 
         boolean maximizingPlayer = (board.currentPlayer == this);
         ArrayList<Action> actions = getActions(board);
-        ArrayList<Tuple<Action, ArrayList<Tuple<Board, Double>>>> actionsOutcomes = expandSpectrum(actions, board);
+        ArrayList<Tuple<Action, ArrayList<Tuple<Board, Double>>>> actionsOutcomes = TreeUtils.expandSpectrum(board, actions);
 
         if (maximizingPlayer) {
             Action bestAction = null;
@@ -136,7 +132,7 @@ public class PlayerMinMax extends Player {
     public ArrayList<Action> getActions(Board board) {
         ArrayList<Action> actions = null;
         if (pruning) {
-            // actions = list_pruned_actions(board)
+            actions = TreeUtils.listPrunedActions(board); // Not done yet
         } else {
             actions = new ArrayList<>(super.CheckPossibleMoves(board));
         }
