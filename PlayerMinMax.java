@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class PlayerMinMax extends Player {
@@ -14,10 +15,11 @@ public class PlayerMinMax extends Player {
 
     public Random random;
 
-    public PlayerMinMax(int id, String tag, int randSeed) {
+    public PlayerMinMax(int id, String tag, int randSeed, int depth, double epsilon, boolean pruning) {
         super(id, tag);
         this.randSeed = randSeed;
         random = new Random(randSeed);
+        init(depth, epsilon, pruning);
     }
 
     public void init(int depth, double epsilon, boolean pruning) {
@@ -30,7 +32,7 @@ public class PlayerMinMax extends Player {
                                              StateNode node) {
 
         if (depth == 0 || board.CheckWin(false) || System.nanoTime() >= deadline) {
-            double value = 0; //value_function(board, this.id)
+            double value = ValueFunctions.baseValueFunc(ValueFunctions.DEFAULT_WEIGHTS, board, board.currentPlayer);
             node.nodeValue = value;
 
             return new Tuple<>(null, value);
@@ -256,21 +258,77 @@ public class PlayerMinMax extends Player {
 
     @Override
     public int makeInitialSettlement(Board board) {
-       return super.makeInitialSettlement(board);
+        double maxSpotValue = 0;
+        Spot lastAvailableSpot = null;
+        Spot maxSpot = null;
+
+
+        for (Spot spot : board.spots) {
+            double spotValue = 0;
+
+            if (!board.CreateSettlement(this, spot, false)) {
+                continue;
+            }
+
+            for (Hex hex : spot.adjacentHexes) {
+                if (hex.type == Hex_Type.Brick) {
+                    spotValue += ValueFunctions.BRICK_VALUE_0 * ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                } else if (hex.type == Hex_Type.Wood) {
+                    spotValue += ValueFunctions.TREE_VALUE_0 * ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                } else if (hex.type == Hex_Type.Sheep) {
+                    spotValue += ValueFunctions.SHEEP_VALUE_0 * ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                } else if (hex.type == Hex_Type.Wheat) {
+                    spotValue += ValueFunctions.WHEAT_VALUE_0 * ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                } else if (hex.type == Hex_Type.Ore) {
+                    spotValue += ValueFunctions.ORE_VALUE_0* ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                }
+            }
+
+            if (spotValue > maxSpotValue) {
+                maxSpotValue = spotValue;
+                maxSpot = spot;
+            } else {
+                lastAvailableSpot = spot;
+            }
+        }
+
+        if (maxSpot == null) {
+            maxSpot = lastAvailableSpot;
+        }
+
+        return maxSpot.id;
     }
 
     @Override
     public int makeInitialRoad(Board board, int spotNum) {
-       return super.makeInitialRoad(board, spotNum);
+
+        List<Spot> availableSpots = board.spots.get(spotNum).adjacentSpots;
+
+        // System.out.println(availableSpots.size() + " " + spotNum);
+        int roadInd = random.nextInt(availableSpots.size());
+        //System.out.println(roadInd);
+//
+//        while(board.CreateRoad(this, board.spots.get(spotNum), availableSpots.get(roadInd), false)) {
+//            availableSpots.remove(roadInd);
+//            roadInd = random.nextInt(availableSpots.size());
+//        }
+
+        return availableSpots.get(roadInd).id;
     }
 
     @Override
     public void discardCards(int num) {
-        super.discardCards(num);
+        for (int i = 0; i < num; i++) {
+            if (!super.resourcesAtHand.isEmpty()) {
+                super.resourcesAtHand.remove(random.nextInt(super.resourcesAtHand.size()));
+            } else {
+                break;
+            }
+        }
     }
 
     @Override
     public int[] placeKnight(Board board) {
-        return super.placeKnight(board);
+        return new int[] {random.nextInt(Resources.resourcesList.length), random.nextInt(11) + 1};
     }
 }

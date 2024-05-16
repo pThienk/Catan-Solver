@@ -27,10 +27,9 @@ public class TreeUtils {
 
         if (DETERMINISTIC_ACTIONS.contains(action.actionType)) {
             return executeDeterministic(board, action);
-        } else if (!board.isDiceRolled) {
+        } //else if (!board.isDiceRolled) {
 
-            for (int roll = 2; roll <= 12; roll++) {
-                // This shit is not doable right now
+           //for (int roll = 2; roll <= 12; roll++) {
 
                 /*
 
@@ -42,9 +41,10 @@ public class TreeUtils {
                 results.append((option_game, number_probability(roll))
 
                 */
-            }
+           // }
 
-        } else if (action.actionType == Action_Type.BuyDevelopmentCard) {
+       // }
+        else if (action.actionType == Action_Type.BuyDevelopmentCard) {
 
             ArrayList<DevelopmentCard_Type> currentDeck = new ArrayList<>(DevelopmentCard.developmentCardsDeck);
             Player enemy = board.currentPlayer.getEnemy(board);
