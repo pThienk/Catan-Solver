@@ -204,20 +204,20 @@ public class Board {
     }
     public boolean CheckWin(boolean print){
         for (Player player: players) {
-
-            if(largestArmy != null && player.id == largestArmy.id) player.VP += 2;
-            if(longestRoad != null && player.id == longestRoad.id) player.VP += 2;
+            int VP = 0;
+            if(largestArmy != null && player.id == largestArmy.id) VP += 2;
+            if(longestRoad != null && player.id == longestRoad.id) VP += 2;
             for (int i = 0; i < player.settlements.size(); i++) {
-                if (player.settlements.get(i).isCity) player.VP += 2;
-                else player.VP += 1;
+                if (player.settlements.get(i).isCity) VP += 2;
+                else VP += 1;
             }
             for (int i = 0; i < player.devCards.size(); i++) {
-                if (player.devCards.get(i).type == DevelopmentCard_Type.VictoryPoint) player.VP += 1;
+                if (player.devCards.get(i).type == DevelopmentCard_Type.VictoryPoint) VP += 1;
             }
             if(print){
-                System.out.println("Player " + player.id + " has " + player.VP + " VP");
+                System.out.println("Player " + player.id + " has " + VP + " VP");
             }
-            if(player.VP >= 15) {
+            if(VP >= 15) {
                 player.hasWon = true;
                 return true;
             }

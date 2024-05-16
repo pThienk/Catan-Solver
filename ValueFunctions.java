@@ -19,7 +19,7 @@ public class ValueFunctions {
         put("production", 1e8);
         put("enemy_production", -1e8);
         put("num_tiles", 1.0);
-        put("enemy_reachable_production_1", -1e4);
+        put("enemy_reachable_production_1", 0.0);
         put("reachable_production_1", 1e4);
         put("buildable_nodes", 1e3);
         put("longest_road", 10.0);
@@ -60,6 +60,8 @@ public class ValueFunctions {
     }};
 
     public static double baseValueFunc(Map<String, Double> params, Board board, Player player) {
+
+        int myVP = getPlayerVP(board, player);
 
         double myProduction = valueProduction(player);
         double enemyProduction = valueProduction(player.getEnemy(board));
@@ -106,7 +108,7 @@ public class ValueFunctions {
             longestRoad = params.get("longest_road");
         }
 
-        double sumAllValues = player.VP * params.get("public_vps")
+        double sumAllValues = myVP * params.get("public_vps")
                 + myProduction * params.get("production")
                 + enemyProduction * params.get("enemy_production")
                 + myReachabilityValue * params.get("reachable_production_1")
@@ -114,7 +116,7 @@ public class ValueFunctions {
                 + handSynergy * params.get("hand_synergy")
                 + buildableNodes * params.get("buildable_nodes")
                 + numHex * params.get("num_tiles")
-                + numInHand * params.get("num_resources")
+                + numInHand * params.get("hand_resources")
                 + discardPenalty
                 + longestRoadLength * longestRoadFactor
                 + longestRoad
@@ -215,6 +217,21 @@ public class ValueFunctions {
         }
 
         return buildableNodes;
+    }
+
+    public static int getPlayerVP(Board board, Player player) {
+        int VP = 0;
+        if(board.largestArmy != null && player.id == board.largestArmy.id) VP += 2;
+        if(board.longestRoad != null && player.id == board.longestRoad.id) VP += 2;
+        for (int i = 0; i < player.settlements.size(); i++) {
+            if (player.settlements.get(i).isCity) VP += 2;
+            else VP += 1;
+        }
+        for (int i = 0; i < player.devCards.size(); i++) {
+            if (player.devCards.get(i).type == DevelopmentCard_Type.VictoryPoint) VP += 1;
+        }
+
+        return VP;
     }
 
     public static double playerHasResource(Player player, Resource_Type resourceType) {

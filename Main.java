@@ -37,7 +37,12 @@ public class Main {
         //System.out.println("P1 wins an avg of " + stats[0] + " percent, with StdDEV "+ stats[1] + ". P2 wins an avg of " +
               // stats[2] + " percent, with StdDEV " + stats[3]);
 
-        runPvBotGame();
+        //runPvBotGame();
+        //runPvMinMaxGame();
+
+        int [] results = Benchmarking.benchmarkMinMax(true, 100, 1112, 1113, 3333);
+
+        System.out.println("WRand: " + results[0] + ", " + "MinMax: " + results[1] + ", " + "Discarded: " + results[2]);
     }
 
     public static void runPvPGame() {
@@ -62,6 +67,22 @@ public class Main {
 
         Player player1 = new Player(1, "human");
         Player player2 = new PlayerWRandom(2, "bot", 1134);
+        catanBoard.players.add(player1);
+        catanBoard.players.add(player2);
+
+        //6 14 30 31 45 44 24 35
+        catanBoard.SettlementPhase();
+        catanBoard.PrintBoard();
+
+        catanBoard.GamePhase();
+    }
+
+    public static void runPvMinMaxGame() {
+        Board catanBoard = new Board();
+        catanBoard.PrintBoard();
+
+        Player player1 = new Player(1, "human");
+        Player player2 = new PlayerMinMax(2, "bot", 1112, 3, 0.8, false);
         catanBoard.players.add(player1);
         catanBoard.players.add(player2);
 

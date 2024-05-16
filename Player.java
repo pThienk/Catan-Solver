@@ -10,7 +10,6 @@ public class Player {
     boolean hasWon = false;
     public String tag;
     int knightUsed = 0;
-    int VP = 0;
 
     public Player(int id, String tag){
         this.id = id;
