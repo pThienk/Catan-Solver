@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class PlayerMinMax extends Player {
 
-    public static final int ALPHA_DEFAULT_DEPTH = 3;
+    public static final int ALPHA_DEFAULT_DEPTH = 5;
     public static final int MAX_SEARCH_TIME_SECS = 20;
 
     private int depth;

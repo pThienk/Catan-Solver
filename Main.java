@@ -82,7 +82,7 @@ public class Main {
         catanBoard.PrintBoard();
 
         Player player1 = new Player(1, "human");
-        Player player2 = new PlayerMinMax(2, "bot", 1112, 3, 0.8, false);
+        Player player2 = new PlayerMinMax(2, "bot", 1112, 3, 0.2, false);
         catanBoard.players.add(player1);
         catanBoard.players.add(player2);
 
