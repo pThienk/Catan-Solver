@@ -20,12 +20,12 @@ public class ValueFunctions {
         put("enemy_production", -1e8);
         put("num_tiles", 1.0);
         put("enemy_reachable_production_1", 0.0);
-        put("reachable_production_1", 1e4);
+        put("reachable_production_1", 1e5);
         put("buildable_nodes", 1e3);
         put("longest_road", 10.0);
-        put("hand_synergy", 1e2);
+        put("hand_synergy", 1e5);
         put("hand_resources", 1.0);
-        put("discard_penalty", -5.0);
+        put("discard_penalty", -1500.0);
         put("hand_devs", 10.0);
         put("army_size", 10.1);
     }};
@@ -46,7 +46,7 @@ public class ValueFunctions {
         put("army_size", 12.93844622);
     }};
 
-    private static final Map<String, Double> DICE_PROB = new HashMap<>() {{
+    public static final Map<String, Double> DICE_PROB = new HashMap<>() {{
         put("dice_2", 0.0278);
         put("dice_3", 0.0556);
         put("dice_4", 0.0833);
@@ -129,24 +129,37 @@ public class ValueFunctions {
 
     public static double valueProduction(Player player) {
 
+        double probPoint = 2.778 / 100;
+
         double cumulativeValue = 0;
+        int[] sampleSet = new int[] {0, 0, 0, 0, 0};
         for (Settlement settlement : player.settlements) {
             for (Hex hex : settlement.spotLocated.adjacentHexes) {
                 if (hex.type == Hex_Type.Brick) {
                     cumulativeValue += BRICK_VALUE_0 * DICE_PROB.get("dice_" + hex.diceNum);
+                    sampleSet[0] = 1;
                 } else if (hex.type == Hex_Type.Wood) {
                     cumulativeValue += TREE_VALUE_0 * DICE_PROB.get("dice_" + hex.diceNum);
+                    sampleSet[1] = 1;
                 } else if (hex.type == Hex_Type.Sheep) {
                     cumulativeValue += SHEEP_VALUE_0 * DICE_PROB.get("dice_" + hex.diceNum);
+                    sampleSet[2] = 1;
                 } else if (hex.type == Hex_Type.Wheat) {
                     cumulativeValue += WHEAT_VALUE_0 * DICE_PROB.get("dice_" + hex.diceNum);
+                    sampleSet[3] = 1;
                 } else if (hex.type == Hex_Type.Ore) {
                     cumulativeValue += ORE_VALUE_0 * DICE_PROB.get("dice_" + hex.diceNum);
+                    sampleSet[4] = 1;
                 }
             }
         }
 
-        return cumulativeValue;
+        int nonEmptyResources = 0;
+        for (int i : sampleSet) {
+            nonEmptyResources++;
+        }
+
+        return cumulativeValue + nonEmptyResources * TRANSLATE_VARIETY * probPoint;
     }
 
     public static int findPlayerLongestRoad(Board board, Player player) {

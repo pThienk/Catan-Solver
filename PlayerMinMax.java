@@ -151,14 +151,14 @@ public class PlayerMinMax extends Player {
             Commit(actions.get(0), board);
         }
 
-        if (epsilon != 0 && random.nextDouble() < epsilon) {
+        if (epsilon != 0 && random.nextInt(100) < epsilon * 100) {
             makeWRandomMove(board);
         }
 
         long start_t = System.nanoTime();
         //int stateId = actions.size();
         StateNode node = new StateNode(board.currentPlayer.id);
-        long deadline = (long) ( start_t + MAX_SEARCH_TIME_SECS * Math.floor(1e9) );
+        long deadline = (long) (start_t + MAX_SEARCH_TIME_SECS * Math.floor(1e9));
 
         Tuple<Action, Double> resultAction = alphaBetaAction(board, ALPHA_DEFAULT_DEPTH, Double.MAX_VALUE, -Double.MAX_VALUE,
                 deadline, node);
@@ -168,6 +168,7 @@ public class PlayerMinMax extends Player {
         } else {
             Commit(resultAction.getFirstElement(), board);
         }
+
     }
 
     public void makeWRandomMove(Board board) {
@@ -272,15 +273,15 @@ public class PlayerMinMax extends Player {
 
             for (Hex hex : spot.adjacentHexes) {
                 if (hex.type == Hex_Type.Brick) {
-                    spotValue += ValueFunctions.BRICK_VALUE_0 * ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                    spotValue += ValueFunctions.BRICK_VALUE_0 * ValueFunctions.DICE_PROB.get("dice_" + hex.diceNum);
                 } else if (hex.type == Hex_Type.Wood) {
-                    spotValue += ValueFunctions.TREE_VALUE_0 * ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                    spotValue += ValueFunctions.TREE_VALUE_0 * ValueFunctions.DICE_PROB.get("dice_" + hex.diceNum);
                 } else if (hex.type == Hex_Type.Sheep) {
-                    spotValue += ValueFunctions.SHEEP_VALUE_0 * ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                    spotValue += ValueFunctions.SHEEP_VALUE_0 * ValueFunctions.DICE_PROB.get("dice_" + hex.diceNum);
                 } else if (hex.type == Hex_Type.Wheat) {
-                    spotValue += ValueFunctions.WHEAT_VALUE_0 * ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                    spotValue += ValueFunctions.WHEAT_VALUE_0 * ValueFunctions.DICE_PROB.get("dice_" + hex.diceNum);
                 } else if (hex.type == Hex_Type.Ore) {
-                    spotValue += ValueFunctions.ORE_VALUE_0* ValueFunctions.HEX_NUM_VALUE[hex.diceNum];
+                    spotValue += ValueFunctions.ORE_VALUE_0 * ValueFunctions.DICE_PROB.get("dice_" + hex.diceNum);
                 }
             }
 

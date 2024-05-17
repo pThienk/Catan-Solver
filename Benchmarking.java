@@ -64,11 +64,11 @@ public class Benchmarking {
                 p1 = new PlayerRandom(1, "bot", p1Seed);
             }
 
-            Player p2 = new PlayerMinMax(2, "bot", 1112, 3, 0.8, false);
+            Player p2 = new PlayerMinMax(2, "bot", 1112, 3, 0.7, false);
 
             Board benchmarkBoard = new Board(true, boardSeed);
-            int rand = benchmarkBoard.random.nextInt(2);
-            if(rand > 0){
+            double rand = benchmarkBoard.random.nextDouble();
+            if(rand > 0.5){
                 benchmarkBoard.players.add(p1);
                 benchmarkBoard.players.add(p2);
             }else{
