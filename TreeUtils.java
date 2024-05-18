@@ -13,7 +13,12 @@ public class TreeUtils {
 
     public static ArrayList<Tuple<Board, Double>> executeDeterministic(Board board, Action action) {
         Board gameCopy = new Board(board);
-        gameCopy.currentPlayer.Commit(action, gameCopy);
+        int pass = gameCopy.currentPlayer.Commit(action, gameCopy);
+
+        if (pass == -1) {
+            gameCopy.round++;
+            gameCopy.currentPlayer = gameCopy.players.get(gameCopy.round % gameCopy.players.size());
+        }
 
         ArrayList<Tuple<Board, Double>> results = new ArrayList<>();
         results.add(new Tuple<>(gameCopy, 1.0));

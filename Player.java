@@ -160,6 +160,8 @@ public class Player {
     }
     public int Commit(Action action, Board board){
         if(action.actionType == Action_Type.Pass){
+//            board.round++;
+//            board.currentPlayer = board.players.get(board.round % board.players.size());
             return -1;
         }else if(action.actionType == Action_Type.BuildRoad){
             board.CreateRoad(this, action.thisSpot, action.potentialNextSpot, true);

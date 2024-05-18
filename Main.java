@@ -40,7 +40,7 @@ public class Main {
         //runPvBotGame();
         //runPvMinMaxGame();
 
-        int [] results = Benchmarking.benchmarkMinMax(true, 100, 1500, 3346, 3333);
+        int [] results = Benchmarking.benchmarkMinMax(true, 10, 1500, 3346, 3333);
 
         System.out.println("WRand: " + results[0] + ", " + "MinMax: " + results[1] + ", " + "Discarded: " + results[2]);
     }

@@ -23,7 +23,7 @@ public class ValueFunctions {
         put("reachable_production_1", 1e5);
         put("buildable_nodes", 1e3);
         put("longest_road", 10.0);
-        put("hand_synergy", 1e5);
+        put("hand_synergy", 1e3);
         put("hand_resources", 1.0);
         put("discard_penalty", -1500.0);
         put("hand_devs", 10.0);

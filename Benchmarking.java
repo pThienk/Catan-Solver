@@ -64,7 +64,7 @@ public class Benchmarking {
                 p1 = new PlayerRandom(1, "bot", p1Seed);
             }
 
-            Player p2 = new PlayerMinMax(2, "bot", 1112, 3, 0.7, false);
+            Player p2 = new PlayerMinMax(2, "bot", 1112, 3, 0.8, false);
 
             Board benchmarkBoard = new Board(true, boardSeed);
             double rand = benchmarkBoard.random.nextDouble();
